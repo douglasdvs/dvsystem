@@ -6,6 +6,7 @@ from decouple import config, Csv
 print("DJANGO SETTINGS LOADED")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DJANGO_SETTINGS_MODULE=dvsystem.settings
 
 # Criar diretório de logs se não existir
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
