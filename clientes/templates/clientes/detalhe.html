@@ -1,0 +1,327 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Cliente{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">Detalhes do Cliente</h1>
+        <div class="btn-group">
+            <a href="{% url 'clientes:editar' cliente.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar Cliente
+            </a>
+            <a href="{% url 'clientes:excluir' cliente.id %}" class="btn btn-danger" 
+               onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                <i class="fas fa-trash"></i> Excluir Cliente
+            </a>
+            <a href="{% url 'clientes:lista' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Status do Cliente -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card {% if cliente.ativo %}bg-success{% else %}bg-danger{% endif %} text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">{{ cliente.nome }}</h4>
+                            <p class="mb-0">
+                                {% if cliente.ativo %}
+                                <i class="fas fa-check-circle"></i> Cliente Ativo
+                                {% else %}
+                                <i class="fas fa-times-circle"></i> Cliente Inativo
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="mb-0">{{ cliente.get_tipo_cliente_display }}</h5>
+                            <small>Cadastrado em {{ cliente.data_cadastro|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações Pessoais -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i>
+                    Informações Pessoais
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">CPF/CNPJ</label>
+                            <p>{{ cliente.cpf_cnpj }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">E-mail</label>
+                            <p>
+                                {% if cliente.email %}
+                                <a href="mailto:{{ cliente.email }}" class="text-decoration-none">
+                                    <i class="fas fa-envelope"></i> {{ cliente.email }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">Não informado</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Telefone</label>
+                            <p>
+                                {% if cliente.telefone %}
+                                <a href="tel:{{ cliente.telefone }}" class="text-decoration-none">
+                                    <i class="fas fa-phone"></i> {{ cliente.telefone }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">Não informado</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Observações</label>
+                            <p>{{ cliente.observacao|default:"Sem observações" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-tags me-1"></i>
+                        Tags
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#adicionarTagModal">
+                        <i class="fas fa-plus"></i> Adicionar Tag
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in cliente.tags.all %}
+                        <div class="d-flex align-items-center">
+                            <span class="badge" style="background-color: {{ tag.cor }}; color: white;">
+                                {{ tag.nome }}
+                            </span>
+                            <button class="btn btn-link btn-sm text-danger p-0 ms-1" 
+                                    onclick="removerTag({{ cliente.id }}, {{ tag.id }})"
+                                    title="Remover tag">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted mb-0">Nenhuma tag associada</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Endereços -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-map-marker-alt me-1"></i>
+                Endereços
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#adicionarEnderecoModal">
+                <i class="fas fa-plus"></i> Novo Endereço
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for endereco in cliente.enderecos.all %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">
+                                    {% if endereco.principal %}
+                                    <span class="badge bg-primary">Principal</span>
+                                    {% endif %}
+                                    Endereço {{ forloop.counter }}
+                                </h6>
+                                <div class="btn-group">
+                                    <a href="{% url 'clientes:editar_endereco' endereco.id %}" 
+                                       class="btn btn-warning btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'clientes:excluir_endereco' endereco.id %}" 
+                                       class="btn btn-danger btn-sm" title="Excluir"
+                                       onclick="return confirm('Tem certeza que deseja excluir este endereço?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="card-text mb-1">
+                                <strong>CEP:</strong> {{ endereco.cep }}<br>
+                                <strong>Logradouro:</strong> {{ endereco.logradouro }}, {{ endereco.numero }}
+                                {% if endereco.complemento %}- {{ endereco.complemento }}{% endif %}<br>
+                                <strong>Bairro:</strong> {{ endereco.bairro }}<br>
+                                <strong>Cidade/UF:</strong> {{ endereco.cidade }}/{{ endereco.uf }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p class="text-muted mb-0">Nenhum endereço cadastrado</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Tag -->
+<div class="modal fade" id="adicionarTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Tag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAdicionarTag" method="post" action="{% url 'clientes:adicionar_tag' cliente.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="tag" class="form-label">Selecione a Tag</label>
+                        <select class="form-select" id="tag" name="tag_id" required>
+                            <option value="">Selecione...</option>
+                            {% for tag in tags_disponiveis %}
+                            <option value="{{ tag.id }}" data-cor="{{ tag.cor }}">{{ tag.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formAdicionarTag" class="btn btn-primary">Adicionar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Endereço -->
+<div class="modal fade" id="adicionarEnderecoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Novo Endereço</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEndereco" method="post" action="{% url 'clientes:adicionar_endereco' cliente.id %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" class="form-control" id="cep" name="cep" required>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="logradouro" class="form-label">Logradouro</label>
+                            <input type="text" class="form-control" id="logradouro" name="logradouro" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 mb-3">
+                            <label for="numero" class="form-label">Número</label>
+                            <input type="text" class="form-control" id="numero" name="numero" required>
+                        </div>
+                        <div class="col-md-10 mb-3">
+                            <label for="complemento" class="form-label">Complemento</label>
+                            <input type="text" class="form-control" id="complemento" name="complemento">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="bairro" class="form-label">Bairro</label>
+                            <input type="text" class="form-control" id="bairro" name="bairro" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="cidade" class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="cidade" name="cidade" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="uf" class="form-label">UF</label>
+                            <select class="form-select" id="uf" name="uf" required>
+                                <option value="">Selecione...</option>
+                                {% for uf in ufs %}
+                                <option value="{{ uf.0 }}">{{ uf.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="principal" name="principal">
+                            <label class="form-check-label" for="principal">
+                                Definir como endereço principal
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formEndereco" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializa o Select2 para o campo de tags
+        $('#tag').select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $('#adicionarTagModal')
+        });
+
+        // Máscara para o campo CEP
+        $('#cep').mask('00000-000');
+
+        // Busca CEP
+        $('#cep').blur(function() {
+            var cep = $(this).val().replace(/\D/g, '');
+            if (cep.length === 8) {
+                $.get('/api/cep/' + cep + '/', function(data) {
+                    $('#logradouro').val(data.logradouro);
+                    $('#bairro').val(data.bairro);
+                    $('#cidade').val(data.cidade);
+                    $('#uf').val(data.uf);
+                });
+            }
+        });
+    });
+
+    function removerTag(clienteId, tagId) {
+        if (confirm('Tem certeza que deseja remover esta tag?')) {
+            $.post('/clientes/' + clienteId + '/tags/remover/', {
+                tag_id: tagId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            })
+            .done(function() {
+                location.reload();
+            })
+            .fail(function() {
+                alert('Erro ao remover a tag. Tente novamente.');
+            });
+        }
+    }
+</script>
+{% endblock %} 

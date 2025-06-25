@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1>Relatório de Vendas por Vendedor</h1>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label for="inicio">Início:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control" value="{{ inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="fim">Fim:</label>
+            <input type="date" id="fim" name="fim" class="form-control" value="{{ fim }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+    </div>
+</form>
+<div class="mb-4">
+    <canvas id="graficoVendasVendedor" height="80"></canvas>
+</div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Vendedor</th>
+            <th>Total Vendido</th>
+            <th>Nº Pedidos</th>
+            <th>Ticket Médio</th>
+            <th>Meta ({{ meta|floatformat:2 }})</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in dados %}
+        <tr>
+            <td>{{ d.vendedor }}</td>
+            <td>R$ {{ d.total_vendido|floatformat:2 }}</td>
+            <td>{{ d.num_pedidos }}</td>
+            <td>R$ {{ d.ticket_medio|floatformat:2 }}</td>
+            <td>
+                <span class="badge bg-{% if d.meta_atingida >= 100 %}success{% elif d.meta_atingida >= 80 %}warning{% else %}secondary{% endif %}">
+                    {{ d.meta_atingida|floatformat:1 }}%
+                </span>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum dado encontrado para o período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = [{% for d in dados %}'{{ d.vendedor|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+const data = [{% for d in dados %}{{ d.total_vendido|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+const colors = data.map(v => v >= {{ meta|floatformat:2 }} ? '#388e3c' : (v >= {{ meta|floatformat:2 }}*0.8 ? '#fbc02d' : '#757575'));
+const ctx = document.getElementById('graficoVendasVendedor').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Total Vendido',
+            data: data,
+            backgroundColor: colors,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => 'R$ ' + ctx.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2}) } }
+        },
+        scales: {
+            x: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %} 

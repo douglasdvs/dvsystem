@@ -1,0 +1,166 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4 text-dark">Clientes</h1>
+    
+    <!-- Cards Informativos -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark">{{ total_clientes }}</h5>
+                            <div class="small text-dark">Total de Clientes</div>
+                        </div>
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark">{{ clientes_ativos }}</h5>
+                            <div class="small text-dark">Clientes Ativos</div>
+                        </div>
+                        <i class="fas fa-user-check fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark">{{ clientes_inativos }}</h5>
+                            <div class="small text-dark">Clientes Inativos</div>
+                        </div>
+                        <i class="fas fa-user-times fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark">{{ total_enderecos }}</h5>
+                            <div class="small text-dark">Endereços Cadastrados</div>
+                        </div>
+                        <i class="fas fa-map-marker-alt fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Principal -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+            <div class="h5 mb-0 text-dark">
+                <i class="fas fa-table me-1"></i>
+                Lista de Clientes
+            </div>
+            <a href="{% url 'clientes:novo' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Novo Cliente
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+            <table id="clientesTable" class="table table-bordered table-hover table-striped align-middle">
+                <thead class="table-light">
+                    <tr class="text-dark">
+                        <th>Nome</th>
+                        <th>CPF/CNPJ</th>
+                        <th>Contato</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Tags</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'clientes:detalhe' cliente.id %}" class="text-decoration-none text-dark">
+                                {{ cliente.nome }}
+                            </a>
+                        </td>
+                        <td>{{ cliente.cpf_cnpj }}</td>
+                        <td>
+                            {% if cliente.email %}
+                            <i class="fas fa-envelope me-1"></i> {{ cliente.email }}<br>
+                            {% endif %}
+                            {% if cliente.telefone %}
+                            <i class="fas fa-phone me-1"></i> {{ cliente.telefone }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cliente.tipo_cliente == 'PF' %}
+                            <span class="badge bg-info">Pessoa Física</span>
+                            {% else %}
+                            <span class="badge bg-primary">Pessoa Jurídica</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cliente.ativo %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for tag in cliente.tags.all %}
+                            <span class="badge" style="background-color: {{ tag.cor }}; color: white;">
+                                {{ tag.nome }}
+                            </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'clientes:detalhe' cliente.id %}" class="btn btn-info btn-sm" title="Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'clientes:editar' cliente.id %}" class="btn btn-warning btn-sm" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'clientes:excluir' cliente.id %}" class="btn btn-danger btn-sm" title="Excluir"
+                                   onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#clientesTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+            },
+            order: [[0, 'asc']],
+            pageLength: 25,
+            responsive: true
+        });
+    });
+</script>
+{% endblock %} 

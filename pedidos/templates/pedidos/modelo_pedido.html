@@ -1,0 +1,89 @@
+<p>{% load static %}</p>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+  .box { margin: 9px 0; padding: 9px; border: 1px solid #ccc; border-radius: 6px; }
+  .titulo { font-size: 14px; font-weight: bold; margin-bottom: 5px; background-color: #f2f2f2; padding: 5px; }
+  .tabela th, .tabela td { padding: 6px; text-align: center; }
+  .tabela th { background-color: #efefef; }
+  .direita { text-align: right; margin-right: 10px; }
+  .destaque { font-weight: bold; font-size: 13px; }
+  .assinatura { margin-top: 60px; text-align: center; }
+  .assinatura div { border-top: 1px solid #999; width: 200px; margin: auto; padding-top: 5px; }
+  .rodape { margin-top: 40px; font-size: 10px; text-align: center; color: #666; }
+  .qr-container { text-align: center; margin-top: 30px; }
+  .qr-container img { width: 150px; height: 150px; }
+  .confirmacao { margin-top: 40px; text-align: center; font-size: 12px; }
+</style>
+
+<!-- Logo e dados do vendedor -->
+<table class="box" width="100%">
+  <tbody>
+    <tr>
+      <td width="40%"><img class="logo" src="{% static 'logo.png' %}" alt="LOGO" width="204" height="73"></td>
+      <td style="text-align: center;" width="40%">
+        <div class="titulo">Pedido n&ordm; {{ pedido.codigo }}</div>
+        <div><strong>Vendedor:</strong> {{ pedido.vendedor }}</div>
+        <strong>Previsão de Entrega:</strong> {{ pedido.data_entrega_prevista|date:"d/m/Y" }}<br>
+        <strong>Modo de Envio:</strong> {{ pedido.get_forma_envio_display }}<br>
+      </td>
+      <td style="text-align: right;" width="30%">Data: {{ pedido.data|date:"d/m/Y" }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Dados do cliente -->
+<div class="box">
+  <div class="titulo">Dados do Cliente</div>
+  <strong>Nome:</strong> {{ cliente.nome }} ({{ cliente.apelido }})<br>
+  <strong>Endereço:</strong> {{ cliente.endereco }}<br>
+  <strong>Bairro:</strong> {{ cliente.bairro }}<br>
+  <strong>Cidade/UF:</strong> {{ cliente.cidade }} - {{ cliente.uf }}<br>
+  <strong>CEP:</strong> {{ cliente.cep }}<br>
+  <strong>Telefone:</strong> {{ cliente.telefone }}
+</div>
+
+<!-- Produtos -->
+<div class="box">
+  <div class="titulo">Produtos</div>
+  <table class="tabela" style="width: 100%; border-collapse: collapse;" border="1">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Unidade</th>
+        <th>Preço unitário</th>
+        <th>Qtd.</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in pedido.itens.all %}
+      <tr>
+        <td>{% if item.produto %}{{ item.produto.descricao }}{% else %}Produto não definido{% endif %}</td>
+        <td>{% if item.produto and item.produto.unidade %}{{ item.produto.unidade }}{% else %}-{% endif %}</td>
+        <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>R$ {{ item.subtotal|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <strong>Produtos:</strong> R$ {{ pedido.subtotal|floatformat:2 }}<br>
+  <strong>Fretes:</strong> R$ {{ pedido.taxa_entrega|floatformat:2 }}<br>
+  <strong>Desconto:</strong> R$ {{ pedido.desconto|floatformat:2 }}<br>
+  <strong>Total:</strong>   R$ {{ pedido.total|floatformat:2 }}<br>
+</div>
+
+<!-- Forma de pagamento -->
+<div class="box">
+  <div class="titulo">Forma de Pagamento</div>
+  <strong>Meios de pagamento:</strong> {{ pedido.forma_pagamento }}
+</div>
+
+<!-- Observação -->
+<div class="box">
+  <div class="titulo">Observação</div>
+  <p>{{ pedido.observacoes|default:'-' }}</p>
+</div>
+
+

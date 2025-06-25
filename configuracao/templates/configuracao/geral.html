@@ -1,0 +1,152 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações Gerais{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.nome_sistema.id_for_label }}" class="form-label">Nome do Sistema</label>
+                        {{ form.nome_sistema }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.versao.id_for_label }}" class="form-label">Versão</label>
+                        {{ form.versao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.timezone.id_for_label }}" class="form-label">Fuso Horário</label>
+                        {{ form.timezone }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.idioma.id_for_label }}" class="form-label">Idioma</label>
+                        {{ form.idioma }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de E-mail</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.smtp_host.id_for_label }}" class="form-label">Servidor SMTP</label>
+                        {{ form.smtp_host }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.smtp_porta.id_for_label }}" class="form-label">Porta SMTP</label>
+                        {{ form.smtp_porta }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.smtp_usuario.id_for_label }}" class="form-label">Usuário SMTP</label>
+                        {{ form.smtp_usuario }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.smtp_senha.id_for_label }}" class="form-label">Senha SMTP</label>
+                        {{ form.smtp_senha }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.smtp_ssl }}
+                            <label class="form-check-label" for="{{ form.smtp_ssl.id_for_label }}">
+                                Usar SSL
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.email_remetente.id_for_label }}" class="form-label">E-mail Remetente</label>
+                        {{ form.email_remetente }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Notificação</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_novo_pedido }}
+                            <label class="form-check-label" for="{{ form.notificar_novo_pedido.id_for_label }}">
+                                Notificar sobre novos pedidos
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_alteracao_status }}
+                            <label class="form-check-label" for="{{ form.notificar_alteracao_status.id_for_label }}">
+                                Notificar sobre alterações de status
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_pagamento }}
+                            <label class="form-check-label" for="{{ form.notificar_pagamento.id_for_label }}">
+                                Notificar sobre pagamentos
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.emails_notificacao.id_for_label }}" class="form-label">E-mails para Notificação</label>
+                        {{ form.emails_notificacao }}
+                        <small class="form-text text-muted">Separe os e-mails por vírgula</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Segurança</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_sessao.id_for_label }}" class="form-label">Tempo de Sessão (minutos)</label>
+                        {{ form.tempo_sessao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tentativas_login.id_for_label }}" class="form-label">Tentativas de Login</label>
+                        {{ form.tentativas_login }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_bloqueio.id_for_label }}" class="form-label">Tempo de Bloqueio (minutos)</label>
+                        {{ form.tempo_bloqueio }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_senha_forte }}
+                            <label class="form-check-label" for="{{ form.requer_senha_forte.id_for_label }}">
+                                Exigir senha forte
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+{% endblock %} 

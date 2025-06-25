@@ -1,0 +1,203 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Pedidos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-card {
+        transition: all 0.3s ease;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-bg);
+        border-radius: 12px;
+    }
+    .order-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 6px 18px rgba(33, 147, 176, 0.10);
+    }
+    .order-header {
+        background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        color: white;
+        padding: 1rem 1.2rem;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .order-header.flex-column {
+        padding: 1rem;
+        text-align: left;
+    }
+    .order-header .badge {
+        font-size: 1.2rem;
+        padding: 0.4em 1em;
+        border-radius: 8px;
+        letter-spacing: 1px;
+    }
+    .order-body {
+        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
+    }
+    .order-footer {
+        padding: 0.8rem 1.2rem;
+        background: rgba(33, 147, 176, 0.05);
+        border-top: 1px solid var(--glass-border);
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+    .order-status {
+        font-size: 0.95rem;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 0.2rem 0.7rem;
+        margin-right: 0.5rem;
+    }
+    .order-priority {
+        font-size: 0.9rem;
+        border-radius: 8px;
+        padding: 0.2rem 0.7rem;
+    }
+    .order-total {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2193b0;
+    }
+    .order-customer {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+    }
+    .order-date {
+        font-size: 0.95rem;
+        color: #666;
+    }
+    .order-actions .btn {
+        font-size: 0.95rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 6px;
+    }
+    .order-actions .btn i {
+        margin-right: 0.5rem;
+    }
+    @media (max-width: 600px) {
+        .order-header, .order-body, .order-footer {
+            padding: 0.7rem 0.6rem;
+        }
+        .order-actions .btn {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- KPIs -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="kpi-card vendas">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Total de Pedidos</h6>
+                        <h3 class="mb-0">{{ total_pedidos }}</h3>
+                    </div>
+                    <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card valor">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Valor Total</h6>
+                        <h3 class="mb-0">R$ {{ valor_total|floatformat:2 }}</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card media">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Valor Médio</h6>
+                        <h3 class="mb-0">R$ {% if total_pedidos %}{{ valor_total|divisibleby:total_pedidos|floatformat:2 }}{% else %}0.00{% endif %}</h3>
+                    </div>
+                    <i class="fas fa-chart-bar fa-2x opacity-75"></i>
+                </div>
+                <div class="progress mt-3 mb-1" aria-label="Progresso da meta de valor médio">
+                    {% widthratio valor_total 10000 100 as percentual %}
+                    <div class="progress-bar bg-info" style="width: {{ percentual|default:0 }}%"></div>
+                </div>
+                <small class="text-muted">
+                    {{ percentual|default:0 }}% da meta de valor total (R$ 10.000,00)
+                    {% if valor_total >= 10000 %}
+                        <span class="badge bg-success ms-2">Meta atingida!</span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-between align-items-center mb-4">
+        <div class="col-auto">
+            <h3 class="mb-0"><i class="fas fa-list me-2"></i>Gestão de Pedidos</h3>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'pedidos:novo' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Novo Pedido
+            </a>
+        </div>
+    </div>
+    <!-- Filtros -->
+    <div class="card mb-4" style="background: var(--glass-bg); border: 1px solid var(--glass-border);">
+        <div class="card-body py-3">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-2">{{ form.status.label_tag }}{{ form.status }}</div>
+                <div class="col-md-2">{{ form.prioridade.label_tag }}{{ form.prioridade }}</div>
+                <div class="col-md-2">{{ form.vendedor.label_tag }}{{ form.vendedor }}</div>
+                <div class="col-md-2">{{ form.data_inicio.label_tag }}{{ form.data_inicio }}</div>
+                <div class="col-md-2">{{ form.data_fim.label_tag }}{{ form.data_fim }}</div>
+                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-1"></i>Filtrar</button></div>
+                <div class="col-md-12">{{ form.busca.label_tag }}{{ form.busca }}</div>
+            </form>
+        </div>
+    </div>
+    <!-- Lista de Pedidos -->
+    {% if pedidos %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for pedido in pedidos %}
+        <div class="col">
+            <div class="order-card h-100">
+                <div class="order-header flex-column align-items-start" style="gap: 0.3rem;">
+                    <span class="badge bg-primary fs-5 mb-1" style="letter-spacing:1px; border-radius:8px; padding:0.4em 1em;">Pedido Nº {{ pedido.codigo }}</span>
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <span class="order-status bg-{{ pedido.cor_status }} text-white">{{ pedido.get_status_display }}</span>
+                    </div>
+                </div>
+                <div class="order-body">
+                    <div class="order-customer mb-1"><i class="fas fa-user me-1"></i>{{ pedido.cliente.nome }}</div>
+                    <div class="order-date mb-2"><i class="fas fa-calendar me-1"></i>{{ pedido.data|date:"d/m/Y" }}</div>
+                    <div class="order-priority bg-{{ pedido.cor_prioridade }} text-white mb-2">{{ pedido.get_prioridade_display }}</div>
+                    <div class="order-total mb-2"><i class="fas fa-coins me-1"></i>R$ {{ pedido.total|floatformat:2 }}</div>
+                    <div class="order-date"><i class="fas fa-clock me-1"></i>Vencimento: {% if pedido.data_vencimento %}{{ pedido.data_vencimento|date:"d/m/Y" }}{% else %}-{% endif %}</div>
+                </div>
+                <div class="order-footer order-actions" style="gap:0.7rem;">
+                    <a href="{% url 'pedidos:detalhes' pedido.pk %}" class="btn btn-info d-flex align-items-center gap-1" title="Detalhes"><i class="fas fa-eye"></i> <span class="d-none d-md-inline">Detalhes</span></a>
+                    {% if pedido.pode_ser_editado %}
+                    <a href="{% url 'pedidos:editar' pedido.pk %}" class="btn btn-warning d-flex align-items-center gap-1" title="Editar"><i class="fas fa-edit"></i> <span class="d-none d-md-inline">Editar</span></a>
+                    {% endif %}
+                    {% if pedido.pode_ser_cancelado %}
+                    <a href="{% url 'pedidos:excluir' pedido.pk %}" class="btn btn-danger d-flex align-items-center gap-1" title="Excluir"><i class="fas fa-trash"></i> <span class="d-none d-md-inline">Excluir</span></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-4"><i class="fas fa-info-circle me-2"></i>Nenhum pedido encontrado.</div>
+    {% endif %}
+</div>
+{% endblock %}

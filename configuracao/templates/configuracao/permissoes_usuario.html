@@ -1,0 +1,81 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Permissões de Usuário{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Usuário</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.usuario.id_for_label }}" class="form-label">Usuário</label>
+                        {{ form.usuario }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Permissões</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pode_gerenciar_usuarios }}
+                            <label class="form-check-label" for="{{ form.pode_gerenciar_usuarios.id_for_label }}">
+                                Pode Gerenciar Usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pode_gerenciar_permissoes }}
+                            <label class="form-check-label" for="{{ form.pode_gerenciar_permissoes.id_for_label }}">
+                                Pode Gerenciar Permissões
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pode_gerenciar_configuracoes }}
+                            <label class="form-check-label" for="{{ form.pode_gerenciar_configuracoes.id_for_label }}">
+                                Pode Gerenciar Configurações
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pode_gerenciar_logs }}
+                            <label class="form-check-label" for="{{ form.pode_gerenciar_logs.id_for_label }}">
+                                Pode Gerenciar Logs
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pode_gerenciar_backup }}
+                            <label class="form-check-label" for="{{ form.pode_gerenciar_backup.id_for_label }}">
+                                Pode Gerenciar Backup
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Permissões</button>
+        </div>
+    </div>
+</form>
+{% endblock %} 

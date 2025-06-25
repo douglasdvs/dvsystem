@@ -1,0 +1,444 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load status_extras %}
+
+{% block title %}Pedido {{ pedido.numero_pedido }}{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+  body, .container {
+    background: #fff !important;
+    color: #222 !important;
+    font-family: 'Segoe UI', Arial, sans-serif !important;
+  }
+  .print-header {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .print-logo {
+    max-height: 60px;
+    margin-bottom: 8px;
+  }
+  .print-title {
+    font-size: 1.7em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .print-info-table {
+    width: 100%;
+    margin-bottom: 18px;
+    border-collapse: collapse;
+  }
+  .print-info-table td {
+    padding: 3px 8px;
+    font-size: 1em;
+    border: none;
+  }
+  .print-info-table .label {
+    font-weight: bold;
+    color: #333;
+    width: 120px;
+  }
+  .print-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+  }
+  .print-items-table th, .print-items-table td {
+    border: 1px solid #888;
+    padding: 6px 8px;
+    font-size: 1em;
+  }
+  .print-items-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: left;
+  }
+  .print-totals {
+    text-align: right;
+    font-size: 1.1em;
+    margin-top: 8px;
+  }
+  .print-observacoes {
+    margin-top: 12px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    padding: 8px;
+    background: #fafafa;
+  }
+  .print-footer {
+    text-align: center;
+    font-size: 0.95em;
+    color: #888;
+    margin-top: 30px;
+  }
+  .navbar, .sidebar, .btn, .btn-group, .alert, .f1-title, .card, .no-print, .d-print-none, .card-header, .card-footer, .row, .col-md-8, .col-md-6, .col-md-4 {
+    display: none !important;
+  }
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="print-header d-print-block d-none">
+  {# Substitua o src abaixo pelo caminho do logo da sua empresa se desejar #}
+  <img src="{% static 'core/img/logo.png' %}" class="print-logo" alt="Logo">
+  <div class="print-title">Pedido de Venda</div>
+  <div><strong>{{ empresa.nome }}</strong> | CNPJ: {{ empresa.cnpj }}<br>{{ empresa.endereco }} | {{ empresa.telefone }}</div>
+</div>
+
+<table class="print-info-table d-print-block d-none">
+  <tr>
+    <td class="label">Nº Pedido:</td>
+    <td>{{ pedido.numero_pedido }}</td>
+    <td class="label">Data:</td>
+    <td>{{ pedido.data|date:"d/m/Y" }}</td>
+  </tr>
+  <tr>
+    <td class="label">Cliente:</td>
+    <td>{{ pedido.cliente.nome }}</td>
+    <td class="label">Vendedor:</td>
+    <td>{{ pedido.vendedor }}</td>
+  </tr>
+  <tr>
+    <td class="label">Vencimento:</td>
+    <td>{% if pedido.data_vencimento %}{{ pedido.data_vencimento|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+    <td class="label">Pagamento:</td>
+    <td>{{ pedido.get_forma_pagamento_display }}</td>
+  </tr>
+  {% if pedido.endereco_entrega %}
+  <tr>
+    <td class="label">Entrega:</td>
+    <td colspan="3">{{ pedido.endereco_entrega }}</td>
+  </tr>
+  {% endif %}
+</table>
+
+<table class="print-items-table d-print-block d-none">
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Qtd</th>
+      <th>Preço Unit.</th>
+      <th>Desconto</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in pedido.itens.all %}
+    <tr>
+      <td>{{ item.produto.descricao }}</td>
+      <td>{{ item.quantidade }}</td>
+      <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+      <td>{% if item.desconto_item > 0 %}R$ {{ item.desconto_item|floatformat:2 }} <small>({{ item.desconto_percentual|floatformat:1 }}%)</small>{% else %}-{% endif %}</td>
+      <td>R$ {{ item.subtotal|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="print-totals d-print-block d-none">
+  <div>Subtotal: <strong>R$ {{ pedido.subtotal|floatformat:2 }}</strong></div>
+  {% if pedido.desconto > 0 %}
+  <div>Desconto: <span style="color:#b00">- R$ {{ pedido.desconto|floatformat:2 }}</span></div>
+  {% endif %}
+  {% if pedido.taxa_entrega > 0 %}
+  <div>Taxa de Entrega: <span style="color:#007bff">+ R$ {{ pedido.taxa_entrega|floatformat:2 }}</span></div>
+  {% endif %}
+  <div style="font-size:1.2em; font-weight:bold;">TOTAL: R$ {{ pedido.total|floatformat:2 }}</div>
+</div>
+
+{% if pedido.observacoes %}
+<div class="print-observacoes d-print-block d-none">
+  <strong>Observações:</strong><br>
+  {{ pedido.observacoes }}
+</div>
+{% endif %}
+
+<div class="print-footer d-print-block d-none">
+  Documento gerado por {{ empresa.nome }} | {{ empresa.site|default:'www.seusite.com.br' }}
+</div>
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="f1-title">
+            <i class="fas fa-file-invoice"></i> Pedido {{ pedido.numero_pedido }}
+            <span class="badge bg-{{ pedido.cor_status }} ms-2">{{ pedido.get_status_display }}</span>
+            <span class="badge bg-{{ pedido.cor_prioridade }} ms-1">{{ pedido.get_prioridade_display }}</span>
+        </h1>
+        <div class="btn-group">
+            <a href="{% url 'pedidos:listar' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            {% if pedido.pode_ser_editado %}
+            <a href="{% url 'pedidos:editar' pedido.pk %}" class="btn f1-btn">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            {% endif %}
+            <a href="{% url 'pedidos:pedido_pdf' pedido.pk %}" target="_blank" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Imprimir Pedido
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Alertas -->
+    {% if pedido.em_atraso %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Pedido em atraso!</strong> Vencimento era em {{ pedido.data_vencimento|date:"d/m/Y" }}
+    </div>
+    {% endif %}
+
+    {% if pedido.entrega_em_atraso %}
+    <div class="alert alert-danger">
+        <i class="fas fa-clock"></i> 
+        <strong>Entrega em atraso!</strong> Previsão era {{ pedido.data_entrega_prevista|date:"d/m/Y" }}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Informações do Pedido -->
+        <div class="col-md-8">
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Informações do Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-dark table-borderless">
+                                <tr>
+                                    <td><strong>Cliente:</strong></td>
+                                    <td>{{ pedido.cliente.nome }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vendedor:</strong></td>
+                                    <td>{{ pedido.vendedor }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Data:</strong></td>
+                                    <td>{{ pedido.data|date:"d/m/Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Forma Pagamento:</strong></td>
+                                    <td>{{ pedido.get_forma_pagamento_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-dark table-borderless">
+                                <tr>
+                                    <td><strong>Vencimento:</strong></td>
+                                    <td>
+                                        {% if pedido.data_vencimento %}
+                                            {{ pedido.data_vencimento|date:"d/m/Y" }}
+                                            {% if pedido.dias_para_vencimento %}
+                                                <small class="text-muted">({{ pedido.dias_para_vencimento }} dias)</small>
+                                            {% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Entrega Prevista:</strong></td>
+                                    <td>
+                                        {{ pedido.data_entrega_prevista|date:"d/m/Y"|default:"-" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Entrega Realizada:</strong></td>
+                                    <td>
+                                        {{ pedido.data_entrega_realizada|date:"d/m/Y"|default:"-" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Criado em:</strong></td>
+                                    <td>{{ pedido.criado_em|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if pedido.endereco_entrega %}
+                    <div class="mt-3">
+                        <strong>Endereço de Entrega:</strong>
+                        <p class="mb-0">{{ pedido.endereco_entrega }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if pedido.observacoes %}
+                    <div class="mt-3">
+                        <strong>Observações:</strong>
+                        <p class="mb-0">{{ pedido.observacoes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Itens do Pedido -->
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-shopping-cart"></i> Itens do Pedido</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Qtd</th>
+                                    <th>Preço Unit.</th>
+                                    <th>Desconto</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in pedido.itens.all %}
+                                <tr>
+                                    <td>
+                                        {{ item.produto.descricao }}
+                                        {% if item.observacoes %}
+                                            <br><small class="text-muted">{{ item.observacoes }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.quantidade }}</td>
+                                    <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+                                    <td>
+                                        {% if item.desconto_item > 0 %}
+                                            R$ {{ item.desconto_item|floatformat:2 }}
+                                            <small class="text-muted">({{ item.desconto_percentual|floatformat:1 }}%)</small>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-success">R$ {{ item.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Nenhum item adicionado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-secondary">
+                                    <th colspan="4">Subtotal:</th>
+                                    <th>R$ {{ pedido.subtotal|floatformat:2 }}</th>
+                                </tr>
+                                {% if pedido.desconto > 0 %}
+                                <tr>
+                                    <th colspan="4">Desconto:</th>
+                                    <th class="text-warning">- R$ {{ pedido.desconto|floatformat:2 }}</th>
+                                </tr>
+                                {% endif %}
+                                {% if pedido.taxa_entrega > 0 %}
+                                <tr>
+                                    <th colspan="4">Taxa de Entrega:</th>
+                                    <th class="text-info">+ R$ {{ pedido.taxa_entrega|floatformat:2 }}</th>
+                                </tr>
+                                {% endif %}
+                                <tr class="table-success">
+                                    <th colspan="4">TOTAL:</th>
+                                    <th>R$ {{ pedido.total|floatformat:2 }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Ações Rápidas -->
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Ações Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% for status in proximos_status %}
+                        <a href="{% url 'pedidos:alterar_status' pedido.pk status %}" 
+                           class="btn btn-outline-success">
+                            <i class="fas fa-arrow-right"></i> 
+                            {{ status|status_label }}
+                        </a>
+                        {% endfor %}
+                        
+                        <a href="{% url 'pedidos:adicionar_observacao' pedido.pk %}" 
+                           class="btn btn-outline-info">
+                            <i class="fas fa-comment"></i> Adicionar Observação
+                        </a>
+                        
+                        {% if pedido.pode_ser_cancelado %}
+                        <a href="{% url 'pedidos:alterar_status' pedido.pk 'X' %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('Tem certeza que deseja cancelar este pedido?')">
+                            <i class="fas fa-times"></i> Cancelar Pedido
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arquivos -->
+            {% if pedido.arquivo_arte %}
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-file"></i> Arte do Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ pedido.arquivo_arte.url }}" target="_blank" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-download"></i> Baixar Arquivo
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Histórico -->
+            <div class="card f1-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Histórico</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in historico %}
+                    <div class="mb-3 p-3" style="background: #7babee; border-radius: 8px;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <small class="text-muted">
+                                {% if item.tipo == 'criacao' %}
+                                    <i class="fas fa-plus-circle text-success"></i>
+                                {% elif item.tipo == 'status' %}
+                                    <i class="fas fa-exchange-alt text-info"></i>
+                                {% elif item.tipo == 'edicao' %}
+                                    <i class="fas fa-edit text-warning"></i>
+                                {% else %}
+                                    <i class="fas fa-comment text-primary"></i>
+                                {% endif %}
+                                {{ item.get_tipo_display }}
+                            </small>
+                            <small class="text-muted">{{ item.data|date:"d/m H:i" }}</small>
+                        </div>
+                        <p class="mb-1 mt-1">{{ item.descricao }}</p>
+                        {% if item.usuario %}
+                        <small class="text-muted">por {{ item.usuario.username }}</small>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Nenhum histórico disponível</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Cache{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Geral</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.cache_habilitado }}
+                            <label class="form-check-label" for="{{ form.cache_habilitado.id_for_label }}">
+                                Cache Habilitado
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tipo_cache.id_for_label }}" class="form-label">Tipo de Cache</label>
+                        {{ form.tipo_cache }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_cache.id_for_label }}" class="form-label">Tempo de Cache (minutos)</label>
+                        {{ form.tempo_cache }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tamanho_cache.id_for_label }}" class="form-label">Tamanho do Cache (MB)</label>
+                        {{ form.tamanho_cache }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Redis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.redis_host.id_for_label }}" class="form-label">Host</label>
+                        {{ form.redis_host }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.redis_porta.id_for_label }}" class="form-label">Porta</label>
+                        {{ form.redis_porta }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.redis_senha.id_for_label }}" class="form-label">Senha</label>
+                        {{ form.redis_senha }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.redis_banco.id_for_label }}" class="form-label">Banco</label>
+                        {{ form.redis_banco }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Memcached</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.memcached_host.id_for_label }}" class="form-label">Host</label>
+                        {{ form.memcached_host }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.memcached_porta.id_for_label }}" class="form-label">Porta</label>
+                        {{ form.memcached_porta }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.memcached_peso.id_for_label }}" class="form-label">Peso</label>
+                        {{ form.memcached_peso }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="btn-limpar-cache">
+                            Limpar Cache
+                        </button>
+                        <div id="status-limpeza" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Limpando cache...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" id="btn-verificar-cache">
+                            Verificar Cache
+                        </button>
+                        <div id="status-verificacao" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando cache...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" id="btn-otimizar-cache">
+                            Otimizar Cache
+                        </button>
+                        <div id="status-otimizacao" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Otimizando cache...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção
+        $('select').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Mostrar/ocultar campos de Redis baseado no tipo de cache
+        $('#{{ form.tipo_cache.id_for_label }}').change(function() {
+            var tipoCache = $(this).val();
+            if (tipoCache === 'redis') {
+                $('.campo-redis').show();
+                $('.campo-memcached').hide();
+            } else if (tipoCache === 'memcached') {
+                $('.campo-redis').hide();
+                $('.campo-memcached').show();
+            } else {
+                $('.campo-redis').hide();
+                $('.campo-memcached').hide();
+            }
+        }).trigger('change');
+        
+        // Limpar cache
+        $('#btn-limpar-cache').click(function() {
+            $('#status-limpeza').show();
+            $.ajax({
+                url: '{% url "configuracao:limpar_cache" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-limpeza .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Cache limpo com sucesso!');
+                },
+                error: function() {
+                    $('#status-limpeza .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao limpar cache.');
+                }
+            });
+        });
+        
+        // Verificar cache
+        $('#btn-verificar-cache').click(function() {
+            $('#status-verificacao').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_cache" %}',
+                method: 'GET',
+                success: function(response) {
+                    $('#status-verificacao .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Cache verificado com sucesso!');
+                },
+                error: function() {
+                    $('#status-verificacao .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar cache.');
+                }
+            });
+        });
+        
+        // Otimizar cache
+        $('#btn-otimizar-cache').click(function() {
+            $('#status-otimizacao').show();
+            $.ajax({
+                url: '{% url "configuracao:otimizar_cache" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-otimizacao .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Cache otimizado com sucesso!');
+                },
+                error: function() {
+                    $('#status-otimizacao .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao otimizar cache.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Despesas</title>
+</head>
+<body>
+  <h2>Despesas</h2>
+  <a href="{% url 'financeiro:nova_despesa' %}">Nova Despesa</a>
+  <table border="1">
+    <tr>
+      <th>Descrição</th>
+      <th>Data</th>
+      <th>Valor</th>
+      <th>Ações</th>
+    </tr>
+    {% for despesa in despesas %}
+    <tr>
+      <td>{{ despesa.descricao }}</td>
+      <td>{{ despesa.data }}</td>
+      <td>{{ despesa.valor }}</td>
+      <td>
+        <a href="{% url 'financeiro:editar_despesa' despesa.pk %}">Editar</a> |
+        <a href="{% url 'financeiro:deletar_despesa' despesa.pk %}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

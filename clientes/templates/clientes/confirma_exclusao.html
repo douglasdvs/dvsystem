@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}Confirmar Exclusão{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="card f1-card mx-auto" style="max-width:400px;">
+    <div class="card-body text-center f1-body">
+      <h5>Excluir cliente "{{ cliente.nome }}"?</h5>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger me-2">Sim, excluir</button>
+        <a href="{% url 'clientes:listar' %}" class="btn btn-secondary">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Modelo de Impressão{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">{{ modelo.nome|default:'Novo Modelo de Impressão' }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Nome</label>
+      {{ form.nome|add_class:'form-control' }}
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tipo</label>
+      {{ form.tipo|add_class:'form-select' }}
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Template HTML</label>
+      {{ form.template_html|add_class:'form-control'|attr:'rows:10' }}
+      <div class="form-text">
+        Utilize variáveis como <code>&#123;&#123; pedido.cliente.nome &#125;&#125;</code>, <code>&#123;&#123; pedido.codigo &#125;&#125;</code>, etc.<br>
+        <strong>Campos disponíveis:</strong>
+        <ul>
+          <li><code>&#123;&#123; pedido.codigo &#125;&#125;</code> — Código do pedido</li>
+          <li><code>&#123;&#123; pedido.data &#125;&#125;</code> — Data do pedido</li>
+          <li><code>&#123;&#123; pedido.status &#125;&#125;</code> — Status</li>
+          <li><code>&#123;&#123; pedido.valor_total &#125;&#125;</code> — Valor total</li>
+          <li><code>&#123;&#123; pedido.cliente.nome &#125;&#125;</code> — Nome do cliente</li>
+          <li><code>&#123;&#123; pedido.cliente.cpf_cnpj &#125;&#125;</code> — CPF/CNPJ do cliente</li>
+          <li><code>&#123;&#123; pedido.cliente.email &#125;&#125;</code> — E-mail do cliente</li>
+          <li><code>&#123;&#123; pedido.cliente.telefone &#125;&#125;</code> — Telefone do cliente</li>
+          <li><code>&#123;&#123; pedido.cliente.endereco_completo &#125;&#125;</code> — Endereço completo do cliente</li>
+          <li><code>&#123;&#123; pedido.itens &#125;&#125;</code> — Lista de itens do pedido (iterar com for)</li>
+        </ul>
+        <strong>Exemplo de uso de itens:</strong><br>
+        <pre>&#123;% for item in pedido.itens.all %&#125;
+- &#123;&#123; item.quantidade &#125;&#125;x &#123;&#123; item.produto.descricao &#125;&#125; (&#123;&#123; item.preco_unitario &#125;&#125;)
+&#123;% endfor %&#125;</pre>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'configuracao:lista_modelos_impressao' %}" class="btn btn-secondary">Voltar</a>
+      <button type="submit" class="btn btn-success">Salvar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

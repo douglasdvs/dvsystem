@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block title %}Configuração do Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Configuração do Sistema</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Nome do Sistema</label>
+      {{ form.nome_sistema }}
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tema Primário</label>
+      <input type="color" name="tema_primario" value="{{ form.instance.tema_primario|default:'#0d6efd' }}" class="form-control form-control-color" style="width: 4rem; height: 2.5rem;">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tema Secundário</label>
+      <input type="color" name="tema_secundario" value="{{ form.instance.tema_secundario|default:'#6dd5ed' }}" class="form-control form-control-color" style="width: 4rem; height: 2.5rem;">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">E-mail de Suporte</label>
+      {{ form.email_suporte }}
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Logo</label>
+      {{ form.logo }}
+      {% if form.instance.logo %}
+        <div class="mt-2"><img src="{{ form.instance.logo.url }}" alt="Logo" style="max-height: 60px;"></div>
+      {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">Salvar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

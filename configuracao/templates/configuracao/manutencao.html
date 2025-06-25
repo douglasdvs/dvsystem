@@ -1,0 +1,257 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Manutenção{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Modo de Manutenção</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.modo_manutencao }}
+                            <label class="form-check-label" for="{{ form.modo_manutencao.id_for_label }}">
+                                Ativar Modo de Manutenção
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.mensagem_manutencao.id_for_label }}" class="form-label">Mensagem de Manutenção</label>
+                        {{ form.mensagem_manutencao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_estimado.id_for_label }}" class="form-label">Tempo Estimado</label>
+                        {{ form.tempo_estimado }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.manutencao_agendada }}
+                            <label class="form-check-label" for="{{ form.manutencao_agendada.id_for_label }}">
+                                Manutenção Agendada
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Acesso Durante Manutenção</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.ips_permitidos.id_for_label }}" class="form-label">IPs Permitidos</label>
+                        {{ form.ips_permitidos }}
+                        <small class="form-text text-muted">Um IP por linha</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.usuarios_permitidos.id_for_label }}" class="form-label">Usuários Permitidos</label>
+                        {{ form.usuarios_permitidos }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.manter_admin }}
+                            <label class="form-check-label" for="{{ form.manter_admin.id_for_label }}">
+                                Manter Acesso Administrativo
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.manter_api }}
+                            <label class="form-check-label" for="{{ form.manter_api.id_for_label }}">
+                                Manter Acesso à API
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_usuarios }}
+                            <label class="form-check-label" for="{{ form.notificar_usuarios.id_for_label }}">
+                                Notificar Usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.antecedencia_notificacao.id_for_label }}" class="form-label">Antecedência da Notificação (horas)</label>
+                        {{ form.antecedencia_notificacao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.email_notificacao.id_for_label }}" class="form-label">Email para Notificação</label>
+                        {{ form.email_notificacao }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_conclusao }}
+                            <label class="form-check-label" for="{{ form.notificar_conclusao.id_for_label }}">
+                                Notificar Conclusão
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-warning" id="btn-limpar-cache">
+                            Limpar Cache
+                        </button>
+                        <div id="status-cache" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Limpando cache...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-danger" id="btn-limpar-sessao">
+                            Limpar Sessões
+                        </button>
+                        <div id="status-sessao" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Limpando sessões...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" id="btn-verificar-sistema">
+                            Verificar Sistema
+                        </button>
+                        <div id="status-verificacao" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando sistema...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção múltipla
+        $('select[multiple]').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Validação de IPs
+        $('#{{ form.ips_permitidos.id_for_label }}').on('blur', function() {
+            var ips = $(this).val().split('\n');
+            var validIps = [];
+            
+            ips.forEach(function(ip) {
+                ip = ip.trim();
+                if (ip && /^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+                    validIps.push(ip);
+                }
+            });
+            
+            $(this).val(validIps.join('\n'));
+        });
+        
+        // Limpar cache
+        $('#btn-limpar-cache').click(function() {
+            $('#status-cache').show();
+            $.ajax({
+                url: '{% url "configuracao:limpar_cache" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-cache .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Cache limpo com sucesso!');
+                },
+                error: function() {
+                    $('#status-cache .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao limpar cache.');
+                }
+            });
+        });
+        
+        // Limpar sessões
+        $('#btn-limpar-sessao').click(function() {
+            if (confirm('Tem certeza que deseja limpar todas as sessões? Todos os usuários serão desconectados.')) {
+                $('#status-sessao').show();
+                $.ajax({
+                    url: '{% url "configuracao:limpar_sessao" %}',
+                    method: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        $('#status-sessao .alert').removeClass('alert-info').addClass('alert-success')
+                            .html('Sessões limpas com sucesso!');
+                    },
+                    error: function() {
+                        $('#status-sessao .alert').removeClass('alert-info').addClass('alert-danger')
+                            .html('Erro ao limpar sessões.');
+                    }
+                });
+            }
+        });
+        
+        // Verificar sistema
+        $('#btn-verificar-sistema').click(function() {
+            $('#status-verificacao').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_sistema" %}',
+                method: 'GET',
+                success: function(response) {
+                    var html = '<ul class="list-unstyled">';
+                    response.verificacoes.forEach(function(verificacao) {
+                        html += '<li class="' + (verificacao.status ? 'text-success' : 'text-danger') + '">';
+                        html += '<i class="fas fa-' + (verificacao.status ? 'check' : 'times') + '"></i> ';
+                        html += verificacao.mensagem;
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                    
+                    $('#status-verificacao .alert').removeClass('alert-info').addClass('alert-success')
+                        .html(html);
+                },
+                error: function() {
+                    $('#status-verificacao .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar sistema.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,101 @@
+body:not(.futurista) {
+    background-color: hwb(0 2% 93%);
+    color: #e0e0e0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #60ca2f !important;
+}
+
+.card:not(.f1-card) {
+    background-color: #000000;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #e9e2e24d;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    color: #00e5ff;
+}
+
+.btn-custom {
+    background-color: #00e5ff;
+    color: #d35353;
+    border: none;
+}
+
+.btn-custom:hover {
+    background-color: #00bcd4;
+}
+/* Card 3D */
+.shadow-3d {
+  background: #dadae0;
+  box-shadow:
+    6px 6px 16px rgba(0,0,0,0.9),
+    -6px -6px 16px rgba(226, 216, 216, 0.05),
+    inset 3px 3px 5px rgba(252, 245, 245, 0.051),
+    inset -3px -3px 5px rgba(0,0,0,0.8);
+  border-radius: 1.5rem;
+  border: 1px solid #a6a6a8;
+}
+
+/* Inputs com sombra e borda 3D */
+.shadow-input-3d {
+  border-radius: 0.7rem;
+  border: 3px solid rgb(161, 161, 168);
+  box-shadow:
+    2px 2px 6px rgba(214, 201, 201, 0.8),
+    -2px -2px 6px rgba(219, 212, 212, 0.1);
+  transition: all 0.3s ease;
+}
+
+.shadow-input-3d:focus {
+  outline: none;
+  border-color: #4dc9ff;
+  box-shadow:
+    0 0 8px #4dc9ff,
+    inset 1px 1px 5px rgba(77,201,255,0.6);
+  background-color: #adadbd;
+  color: #a0e7ff;
+}
+
+/* Botões com relevo 3D */
+.btn-3d {
+  background: linear-gradient(145deg, #198754, #146c43);
+  border: none;
+  box-shadow:
+    4px 4px 8px rgba(202, 196, 196, 0.7),
+    -4px -4px 8px rgba(72,180,97,0.7);
+  color: #d1f5d3;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-3d:hover {
+  background: linear-gradient(145deg, #146c43, #198754);
+  box-shadow:
+    inset 4px 4px 8px #5f3c3ce6,
+    inset -4px -4px 8px rgba(72,180,97,0.9);
+  color: #e0f9e0;
+}
+
+/* Texto neon 3D */
+.neon-text-3d {
+  color: #4dc9ff;
+  text-shadow:
+    0 0 6px #4dc9ff,
+    0 0 12px #0faeff,
+    0 0 18px #0faeff;
+}
+
+th, .table th {
+  color: #000 !important;
+}

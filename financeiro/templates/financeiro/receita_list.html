@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Receitas</title>
+</head>
+<body>
+  <h2>Receitas</h2>
+  <a href="{% url 'financeiro:nova_receita' %}">Nova Receita</a>
+  <table border="1">
+    <tr>
+      <th>Descrição</th>
+      <th>Data</th>
+      <th>Valor</th>
+      <th>Ações</th>
+    </tr>
+    {% for receita in receita %}
+    <tr>
+      <td>{{ receita.receita }}</td>
+      <td>{{ receita.data }}</td>
+      <td>{{ receita.valor }}</td>
+      <td>
+        <a href="{% url 'financeiro:editar_receita' receita.pk %}">Editar</a> |
+        <a href="{% url 'financeiro:deletar_despesa' receita.pk %}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

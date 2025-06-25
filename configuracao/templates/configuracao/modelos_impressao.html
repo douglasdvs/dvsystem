@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+{% block title %}Modelo de Impressão{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4"><i class="bi bi-printer"></i> Modelo de Impressão</h2>
+    <div class="alert alert-info">Aqui você pode visualizar e editar o modelo de impressão dos pedidos.</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_conteudo" class="form-label">HTML do Modelo de Impressão</label>
+            <textarea id="id_conteudo" name="conteudo" class="form-control" rows="22">{{ conteudo|default_if_none:''|safe }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Salvar Modelo</button>
+        <div class="input-group mt-3" style="max-width:350px;">
+            <input type="number" id="pedido_id" class="form-control" placeholder="ID do Pedido">
+            <button type="button" class="btn btn-primary" onclick="abrirPDFPedido()">
+                <i class="bi bi-eye"></i> Visualizar Impressão
+            </button>
+        </div>
+        <div class="mt-3">
+            <strong>Pedidos Recentes:</strong>
+            <ul class="list-group" style="max-width:350px;">
+                {% for p in pedidos_recentes %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>ID: {{ p.id }} | Código: {{ p.codigo }}</span>
+                    <a href="/pedidos/{{ p.id }}/pdf/" target="_blank" class="btn btn-sm btn-outline-primary">PDF</a>
+                </li>
+                {% empty %}
+                <li class="list-group-item">Nenhum pedido encontrado.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
+</div>
+<!-- TinyMCE 7 com recursos premium de teste -->
+<script src="https://cdn.tiny.cloud/1/gtokqjpneu8lhdycq0ovrqzlqk2tumt2o9e8ujfsn8ga9pzc/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+  tinymce.init({
+    selector: '#id_conteudo',
+    height: 600,
+    plugins: [
+      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+      'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+    ],
+    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+    tinycomments_mode: 'embedded',
+    tinycomments_author: 'Author name',
+    mergetags_list: [
+      { value: 'First.Name', title: 'First Name' },
+      { value: 'Email', title: 'Email' },
+    ],
+    ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+    content_style: 'body { font-family:Arial,sans-serif; font-size:14px }'
+  });
+  function abrirPDFPedido() {
+    var id = document.getElementById('pedido_id').value;
+    if (id) {
+      window.open('/pedidos/' + id + '/pdf/', '_blank');
+    } else {
+      alert('Digite o ID do pedido!');
+    }
+  }
+</script>
+{% endblock %}

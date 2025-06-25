@@ -1,0 +1,365 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Segurança{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Autenticação</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_sessao.id_for_label }}" class="form-label">Tempo de Sessão (minutos)</label>
+                        {{ form.tempo_sessao }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.manter_sessao }}
+                            <label class="form-check-label" for="{{ form.manter_sessao.id_for_label }}">
+                                Manter Sessão
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tentativas_login.id_for_label }}" class="form-label">Tentativas de Login</label>
+                        {{ form.tentativas_login }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_bloqueio.id_for_label }}" class="form-label">Tempo de Bloqueio (minutos)</label>
+                        {{ form.tempo_bloqueio }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_senha_forte }}
+                            <label class="form-check-label" for="{{ form.requer_senha_forte.id_for_label }}">
+                                Exigir Senha Forte
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tamanho_minimo_senha.id_for_label }}" class="form-label">Tamanho Mínimo da Senha</label>
+                        {{ form.tamanho_minimo_senha }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_caracteres_especiais }}
+                            <label class="form-check-label" for="{{ form.requer_caracteres_especiais.id_for_label }}">
+                                Exigir Caracteres Especiais
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_numeros }}
+                            <label class="form-check-label" for="{{ form.requer_numeros.id_for_label }}">
+                                Exigir Números
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_maiusculas }}
+                            <label class="form-check-label" for="{{ form.requer_maiusculas.id_for_label }}">
+                                Exigir Letras Maiúsculas
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.requer_minusculas }}
+                            <label class="form-check-label" for="{{ form.requer_minusculas.id_for_label }}">
+                                Exigir Letras Minúsculas
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Autenticação em Duas Etapas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.autenticacao_duas_etapas }}
+                            <label class="form-check-label" for="{{ form.autenticacao_duas_etapas.id_for_label }}">
+                                Ativar Autenticação em Duas Etapas
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.metodo_autenticacao.id_for_label }}" class="form-label">Método de Autenticação</label>
+                        {{ form.metodo_autenticacao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_codigo.id_for_label }}" class="form-label">Tempo de Validade do Código (minutos)</label>
+                        {{ form.tempo_codigo }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tamanho_codigo.id_for_label }}" class="form-label">Tamanho do Código</label>
+                        {{ form.tamanho_codigo }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title">IP e Domínio</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.restricao_ip }}
+                            <label class="form-check-label" for="{{ form.restricao_ip.id_for_label }}">
+                                Restringir por IP
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.ips_permitidos.id_for_label }}" class="form-label">IPs Permitidos</label>
+                        {{ form.ips_permitidos }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.restricao_dominio }}
+                            <label class="form-check-label" for="{{ form.restricao_dominio.id_for_label }}">
+                                Restringir por Domínio
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.dominios_permitidos.id_for_label }}" class="form-label">Domínios Permitidos</label>
+                        {{ form.dominios_permitidos }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Certificados</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.usar_ssl }}
+                            <label class="form-check-label" for="{{ form.usar_ssl.id_for_label }}">
+                                Usar SSL
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.certificado_ssl.id_for_label }}" class="form-label">Certificado SSL</label>
+                        {{ form.certificado_ssl }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.chave_ssl.id_for_label }}" class="form-label">Chave SSL</label>
+                        {{ form.chave_ssl }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cadeia_ssl.id_for_label }}" class="form-label">Cadeia SSL</label>
+                        {{ form.cadeia_ssl }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="btn-gerar-certificado">
+                            Gerar Certificado SSL
+                        </button>
+                        <div id="status-certificado" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Gerando certificado...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" id="btn-testar-ssl">
+                            Testar SSL
+                        </button>
+                        <div id="status-ssl" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Testando SSL...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" id="btn-verificar-seguranca">
+                            Verificar Segurança
+                        </button>
+                        <div id="status-seguranca" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando segurança...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção
+        $('select').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Mostrar/ocultar campos de autenticação em duas etapas
+        $('#{{ form.autenticacao_duas_etapas.id_for_label }}').change(function() {
+            var autenticacaoDuasEtapas = $(this).is(':checked');
+            if (autenticacaoDuasEtapas) {
+                $('.campo-autenticacao-duas-etapas').show();
+            } else {
+                $('.campo-autenticacao-duas-etapas').hide();
+            }
+        }).trigger('change');
+        
+        // Mostrar/ocultar campos de restrição por IP
+        $('#{{ form.restricao_ip.id_for_label }}').change(function() {
+            var restricaoIp = $(this).is(':checked');
+            if (restricaoIp) {
+                $('.campo-ip').show();
+            } else {
+                $('.campo-ip').hide();
+            }
+        }).trigger('change');
+        
+        // Mostrar/ocultar campos de restrição por domínio
+        $('#{{ form.restricao_dominio.id_for_label }}').change(function() {
+            var restricaoDominio = $(this).is(':checked');
+            if (restricaoDominio) {
+                $('.campo-dominio').show();
+            } else {
+                $('.campo-dominio').hide();
+            }
+        }).trigger('change');
+        
+        // Mostrar/ocultar campos de SSL
+        $('#{{ form.usar_ssl.id_for_label }}').change(function() {
+            var usarSsl = $(this).is(':checked');
+            if (usarSsl) {
+                $('.campo-ssl').show();
+            } else {
+                $('.campo-ssl').hide();
+            }
+        }).trigger('change');
+        
+        // Gerar certificado SSL
+        $('#btn-gerar-certificado').click(function() {
+            $('#status-certificado').show();
+            $.ajax({
+                url: '{% url "configuracao:gerar_certificado" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#{{ form.certificado_ssl.id_for_label }}').val(response.certificado);
+                    $('#{{ form.chave_ssl.id_for_label }}').val(response.chave);
+                    $('#{{ form.cadeia_ssl.id_for_label }}').val(response.cadeia);
+                    $('#status-certificado .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Certificado gerado com sucesso!');
+                },
+                error: function() {
+                    $('#status-certificado .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao gerar certificado.');
+                }
+            });
+        });
+        
+        // Testar SSL
+        $('#btn-testar-ssl').click(function() {
+            $('#status-ssl').show();
+            $.ajax({
+                url: '{% url "configuracao:testar_ssl" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'certificado_ssl': $('#{{ form.certificado_ssl.id_for_label }}').val(),
+                    'chave_ssl': $('#{{ form.chave_ssl.id_for_label }}').val(),
+                    'cadeia_ssl': $('#{{ form.cadeia_ssl.id_for_label }}').val()
+                },
+                success: function(response) {
+                    $('#status-ssl .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('SSL testado com sucesso!');
+                },
+                error: function() {
+                    $('#status-ssl .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao testar SSL.');
+                }
+            });
+        });
+        
+        // Verificar segurança
+        $('#btn-verificar-seguranca').click(function() {
+            $('#status-seguranca').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_seguranca" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'tempo_sessao': $('#{{ form.tempo_sessao.id_for_label }}').val(),
+                    'manter_sessao': $('#{{ form.manter_sessao.id_for_label }}').is(':checked'),
+                    'tentativas_login': $('#{{ form.tentativas_login.id_for_label }}').val(),
+                    'tempo_bloqueio': $('#{{ form.tempo_bloqueio.id_for_label }}').val(),
+                    'requer_senha_forte': $('#{{ form.requer_senha_forte.id_for_label }}').is(':checked'),
+                    'tamanho_minimo_senha': $('#{{ form.tamanho_minimo_senha.id_for_label }}').val(),
+                    'requer_caracteres_especiais': $('#{{ form.requer_caracteres_especiais.id_for_label }}').is(':checked'),
+                    'requer_numeros': $('#{{ form.requer_numeros.id_for_label }}').is(':checked'),
+                    'requer_maiusculas': $('#{{ form.requer_maiusculas.id_for_label }}').is(':checked'),
+                    'requer_minusculas': $('#{{ form.requer_minusculas.id_for_label }}').is(':checked'),
+                    'autenticacao_duas_etapas': $('#{{ form.autenticacao_duas_etapas.id_for_label }}').is(':checked'),
+                    'metodo_autenticacao': $('#{{ form.metodo_autenticacao.id_for_label }}').val(),
+                    'tempo_codigo': $('#{{ form.tempo_codigo.id_for_label }}').val(),
+                    'tamanho_codigo': $('#{{ form.tamanho_codigo.id_for_label }}').val(),
+                    'restricao_ip': $('#{{ form.restricao_ip.id_for_label }}').is(':checked'),
+                    'ips_permitidos': $('#{{ form.ips_permitidos.id_for_label }}').val(),
+                    'restricao_dominio': $('#{{ form.restricao_dominio.id_for_label }}').is(':checked'),
+                    'dominios_permitidos': $('#{{ form.dominios_permitidos.id_for_label }}').val(),
+                    'usar_ssl': $('#{{ form.usar_ssl.id_for_label }}').is(':checked'),
+                    'certificado_ssl': $('#{{ form.certificado_ssl.id_for_label }}').val(),
+                    'chave_ssl': $('#{{ form.chave_ssl.id_for_label }}').val(),
+                    'cadeia_ssl': $('#{{ form.cadeia_ssl.id_for_label }}').val()
+                },
+                success: function(response) {
+                    $('#status-seguranca .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Segurança verificada com sucesso!');
+                },
+                error: function() {
+                    $('#status-seguranca .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar segurança.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,376 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Painel Geral{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .f1-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    color: #0ff;
+  }
+  .f1-card {
+    background: linear-gradient(135deg, #1f2937, #111827);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+  }
+  .f1-summary-card {
+    background-color: #0d1117;
+    border-left: 5px solid #06b6d4;
+    padding: 1rem;
+    border-radius: .5rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    transition: transform .2s;
+  }
+  .f1-summary-card:hover {
+    transform: scale(1.02);
+  }
+  .f1-summary-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: .5rem;
+  }
+  .f1-bar {
+    height: 10px;
+    background: #06b6d4;
+    border-radius: 10px;
+  }
+  .f1-navbar .nav-link:hover {
+    transform: scale(1.1);
+    transition: all 0.2s ease-in-out;
+  }
+  .tab-pane {
+    padding: 20px 0;
+  }
+  .client-icon {
+    font-size: 1.2rem;
+    margin-right: 5px;
+  }
+  .warning-days {
+    color: #ef4444;
+    font-weight: bold;
+  }
+  .card-header-tabs .nav-link {
+    color: #fff;
+  }
+  .card-header-tabs .nav-link.active {
+    background-color: #0d1117 !important;
+    color: #0ff !important;
+    border-color: #0ff !important;
+  }
+  .product-card {
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  .stock-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+</style>
+
+<div class="container py-4">
+  <h1 class="text-center f1-title mb-4">📊 Painel Geral</h1>
+
+  <!-- Resumo Financeiro -->
+  <div class="row text-center mb-4">
+    <div class="col-md-4">
+      <div class="f1-summary-card">
+        <div class="f1-summary-title">💰 Receita Total</div>
+        <div class="fs-4">R$ {{ total_receitas|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="f1-summary-card">
+        <div class="f1-summary-title">💸 Despesa Total</div>
+        <div class="fs-4">R$ {{ total_despesas|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="f1-summary-card" style="border-left-color: {% if diferenca >= 0 %}#10b981{% else %}#ef4444{% endif %};">
+        <div class="f1-summary-title">📈 Diferença</div>
+        <div class="fs-4">R$ {{ diferenca|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+
+  {% if alerta_prejuizo %}
+  <div class="alert alert-danger text-center fw-bold mb-4">⚠️ Receita menor que Despesas neste período!</div>
+  {% endif %}
+
+  <!-- Gráfico Financeiro -->
+  <div class="card f1-card p-3">
+    <h5 class="text-light mb-3">💹 Desempenho Financeiro (Últimos 12 meses)</h5>
+    <div class="card-body">
+      <canvas id="financialChart" height="250"></canvas>
+    </div>
+  </div>
+
+  <!-- Clientes com abas -->
+  <div class="card f1-card">
+    <div class="card-header bg-transparent border-0">
+      <ul class="nav nav-tabs card-header-tabs" id="clientesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="top-valor-tab" data-bs-toggle="tab" data-bs-target="#top-valor" type="button" role="tab" aria-controls="top-valor" aria-selected="true">💲 Por Valor</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="top-frequencia-tab" data-bs-toggle="tab" data-bs-target="#top-frequencia" type="button" role="tab" aria-controls="top-frequencia" aria-selected="false">🔄 Por Frequência</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="inativos-tab" data-bs-toggle="tab" data-bs-target="#inativos" type="button" role="tab" aria-controls="inativos" aria-selected="false">⚠️ Inativos (+35 dias)</button>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content" id="clientesTabsContent">
+        <!-- Tab: Top por Valor -->
+        <div class="tab-pane fade show active" id="top-valor" role="tabpanel" aria-labelledby="top-valor-tab">
+          <h6 class="text-light mb-3">Top 10 Clientes por Valor Total (últimos 60 dias)</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th class="text-end">Valor Total</th>
+                  <th>Participação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cliente in top_clientes_valor %}
+                <tr>
+                  <td><a href="{% url 'clientes:editar' cliente.id %}" class="text-decoration-none text-info">{{ cliente.nome }}</a></td>
+                  <td>{{ cliente.telefone }}</td>
+                  <td class="text-end">R$ {{ cliente.total|floatformat:2 }}</td>
+                  <td>
+                    <div class="progress" style="height: 8px;">
+                      <div class="progress-bar bg-info" role="progressbar" style="width: {{ cliente.porcentagem }}%"></div>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">Nenhum cliente encontrado.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Tab: Top por Frequência -->
+        <div class="tab-pane fade" id="top-frequencia" role="tabpanel" aria-labelledby="top-frequencia-tab">
+          <h6 class="text-light mb-3">Top 10 Clientes por Frequência de Pedidos (último ano)</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th class="text-end">Pedidos</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cliente in clientes_frequentes %}
+                <tr>
+                  <td><a href="{% url 'clientes:editar' cliente.id %}" class="text-decoration-none text-info">{{ cliente.nome }}</a></td>
+                  <td>{{ cliente.telefone }}</td>
+                  <td class="text-end">{{ cliente.frequencia }}</td>
+                  <td>
+                    <a href="{% url 'pedidos:novo' %}?cliente={{ cliente.id }}" class="btn btn-sm btn-outline-info">Novo Pedido</a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">Nenhum cliente encontrado.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Tab: Clientes Inativos -->
+        <div class="tab-pane fade" id="inativos" role="tabpanel" aria-labelledby="inativos-tab">
+          <h6 class="text-light mb-3">Top 10 Clientes sem Pedidos há mais de 35 dias</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th>Último Pedido</th>
+                  <th>Dias Inativo</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cliente in clientes_inativos %}
+                <tr>
+                  <td><a href="{% url 'clientes:editar' cliente.id %}" class="text-decoration-none text-info">{{ cliente.nome }}</a></td>
+                  <td>{{ cliente.telefone }}</td>
+                  <td>{{ cliente.ultimo_pedido|date:"d/m/Y" }}</td>
+                  <td class="{% if cliente.dias_sem_pedido > 60 %}warning-days{% endif %}">{{ cliente.dias_sem_pedido }}</td>
+                  <td>
+                    <a href="{% url 'pedidos:novo' %}?cliente={{ cliente.id }}" class="btn btn-sm btn-outline-info">Novo Pedido</a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">Nenhum cliente inativo encontrado.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Produtos Mais Vendidos -->
+  <div class="card f1-card">
+    <div class="card-header bg-transparent border-0">
+      <h5 class="text-light mb-0">📦 Top 10 Produtos Mais Vendidos</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        {% for produto in produtos_mais_vendidos %}
+        <div class="col-md-4 mb-3">
+          <div class="card bg-dark product-card">
+            <div class="card-body">
+              <span class="badge {% if produto.cor_estoque == 'danger' %}bg-danger{% elif produto.cor_estoque == 'warning' %}bg-warning text-dark{% else %}bg-success{% endif %} stock-badge">
+                Estoque: {{ produto.estoque_atual }}
+              </span>
+              <h6 class="card-title text-info">{{ produto.descricao }}</h6>
+              <p class="card-text text-light mb-1">Código: {{ produto.codigo }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="badge bg-primary">{{ produto.quantidade }} un</span>
+                  <span class="badge bg-info">R$ {{ produto.valor_total|floatformat:2 }}</span>
+                </div>
+                <a href="{% url 'produtos:editar' produto.id %}" class="btn btn-sm btn-outline-light">Ver</a>
+              </div>
+              <div class="progress mt-2" style="height: 5px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: {{ produto.porcentagem }}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <p class="text-muted text-center">Nenhum produto vendido.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Configuração do gráfico financeiro
+document.addEventListener('DOMContentLoaded', function() {
+  // Dados do gráfico
+  const labels = {{ labels_meses|safe }};
+  const receitas = {{ receitas_mensais|safe }};
+  const despesas = {{ despesas_mensais|safe }};
+  const lucros = {{ lucro_mensal|safe }};
+  
+  // Criar o gráfico
+  const ctx = document.getElementById('financialChart').getContext('2d');
+  const financialChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Receitas',
+          data: receitas,
+          backgroundColor: 'rgba(6, 182, 212, 0.2)',
+          borderColor: 'rgba(6, 182, 212, 1)',
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: 'Despesas',
+          data: despesas,
+          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: 'Lucro',
+          data: lucros,
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderColor: 'rgba(16, 185, 129, 1)',
+          borderWidth: 2,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: '#fff'
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(context.parsed.y);
+              }
+              return label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          ticks: {
+            color: '#fff'
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          ticks: {
+            color: '#fff',
+            callback: function(value) {
+              return 'R$ ' + value.toLocaleString('pt-BR');
+            }
+          }
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

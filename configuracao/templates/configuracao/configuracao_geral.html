@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block title %}Configuração do Sistema{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4"><i class="bi bi-gear"></i> Configuração Geral do Sistema</h2>
+    <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">Configuração do Sistema</h5>
+                {{ config_form.as_p }}
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Dados da Empresa</h5>
+                {{ empresa_form.as_p }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-save me-2"></i>Salvar Configurações</button>
+    </form>
+    <hr>
+    <h5 class="mt-4">Integrações Cadastradas</h5>
+    <table class="table table-bordered">
+        <thead><tr><th>Nome</th><th>Tipo</th><th>API Key</th><th>Ativo</th></tr></thead>
+        <tbody>
+        {% for integracao in integracoes %}
+            <tr>
+                <td>{{ integracao.nome }}</td>
+                <td>{{ integracao.get_tipo_display }}</td>
+                <td>{{ integracao.api_key|default:'-' }}</td>
+                <td>{% if integracao.ativo %}<span class="badge bg-success">Sim</span>{% else %}<span class="badge bg-danger">Não</span>{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-center">Nenhuma integração cadastrada.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

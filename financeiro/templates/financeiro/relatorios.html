@@ -1,0 +1,373 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Relatórios Financeiros{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="f1-title">
+            <i class="fas fa-file-alt"></i> Relatórios Financeiros
+        </h1>
+        <a href="{% url 'financeiro:dashboard' %}" class="btn f1-btn">
+            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+    </div>
+
+    <!-- Formulário de Filtros -->
+    <div class="card f1-card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-filter"></i> Filtros do Relatório</h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        {{ form.data_inicio.label_tag }}
+                        {{ form.data_inicio }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.data_fim.label_tag }}
+                        {{ form.data_fim }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.categoria.label_tag }}
+                        {{ form.categoria }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.status.label_tag }}
+                        {{ form.status }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn f1-btn me-2">
+                            <i class="fas fa-search"></i> Gerar Relatório
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if dados_carregados %}
+    <!-- Resumo Executivo -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>R$ {{ total_receitas|floatformat:2 }}</h4>
+                    <p class="mb-0">Total de Receitas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>R$ {{ total_despesas|floatformat:2 }}</h4>
+                    <p class="mb-0">Total de Despesas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card {% if saldo >= 0 %}bg-primary{% else %}bg-warning text-dark{% endif %} text-white">
+                <div class="card-body text-center">
+                    <h4>R$ {{ saldo|floatformat:2 }}</h4>
+                    <p class="mb-0">Saldo do Período</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card f1-card">
+                <div class="card-header">
+                    <h5>Receitas por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="receitasChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card f1-card">
+                <div class="card-header">
+                    <h5>Despesas por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="despesasChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabelas Detalhadas -->
+    <div class="row">
+        <!-- Receitas por Categoria -->
+        <div class="col-md-6">
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5>Receitas por Categoria</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Total</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in receitas_categoria %}
+                            <tr>
+                                <td>{{ item.categoria|capfirst }}</td>
+                                <td>{{ item.count }}</td>
+                                <td class="text-success">R$ {{ item.total|floatformat:2 }}</td>
+                                <td>
+                                    {% if total_receitas > 0 %}
+                                        {% widthratio item.total total_receitas 100 as percent %}
+                                        {{ percent|floatformat:1 }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhuma receita encontrada</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Despesas por Categoria -->
+        <div class="col-md-6">
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5>Despesas por Categoria</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Total</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in despesas_categoria %}
+                            <tr>
+                                <td>{{ item.categoria|capfirst }}</td>
+                                <td>{{ item.count }}</td>
+                                <td class="text-danger">R$ {{ item.total|floatformat:2 }}</td>
+                                <td>
+                                    {% if total_despesas > 0 %}
+                                        {% widthratio item.total total_despesas 100 as percent %}
+                                        {{ percent|floatformat:1 }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhuma despesa encontrada</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lançamentos Recentes -->
+    <div class="row">
+        {% if receitas %}
+        <div class="col-md-6">
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5>Últimas Receitas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for receita in receitas %}
+                            <tr>
+                                <td>{{ receita.data|date:"d/m/Y" }}</td>
+                                <td>{{ receita.descricao|truncatechars:30 }}</td>
+                                <td class="text-success">R$ {{ receita.valor|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if despesas %}
+        <div class="col-md-6">
+            <div class="card f1-card mb-4">
+                <div class="card-header">
+                    <h5>Últimas Despesas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for despesa in despesas %}
+                            <tr>
+                                <td>{{ despesa.data|date:"d/m/Y" }}</td>
+                                <td>{{ despesa.descricao|truncatechars:30 }}</td>
+                                <td class="text-danger">R$ {{ despesa.valor|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Informações do Relatório -->
+    <div class="card f1-card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Período do Relatório:</h6>
+                    <p>{{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h6>Gerado em:</h6>
+                    <p>{{ "now"|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Mensagem inicial -->
+    <div class="card f1-card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Selecione o período para gerar o relatório</h5>
+            <p class="text-muted">Use os filtros acima para definir as datas e gerar seu relatório financeiro</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if dados_carregados %}
+<script>
+// Configurar Chart.js para tema escuro
+Chart.defaults.color = '#ffffff';
+Chart.defaults.borderColor = '#404040';
+
+// Dados para gráficos
+const receitasData = {{ receitas_categoria|safe }};
+const despesasData = {{ despesas_categoria|safe }};
+
+// Gráfico de Receitas
+const receitasCtx = document.getElementById('receitasChart').getContext('2d');
+new Chart(receitasCtx, {
+    type: 'pie',
+    data: {
+        labels: receitasData.map(item => item.categoria),
+        datasets: [{
+            data: receitasData.map(item => item.total),
+            backgroundColor: [
+                '#38ef7d',
+                '#667eea',
+                '#fdbb2d',
+                '#fc466b',
+                '#3f5efb',
+                '#11998e'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Despesas
+const despesasCtx = document.getElementById('despesasChart').getContext('2d');
+new Chart(despesasCtx, {
+    type: 'pie',
+    data: {
+        labels: despesasData.map(item => item.categoria),
+        datasets: [{
+            data: despesasData.map(item => item.total),
+            backgroundColor: [
+                '#fc466b',
+                '#3f5efb',
+                '#fdbb2d',
+                '#667eea',
+                '#38ef7d',
+                '#11998e'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

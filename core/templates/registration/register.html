@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Criar Conta - DVSYSTEM{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card f1-card mx-auto" style="max-width: 500px;">
+    <div class="card-header bg-success text-white text-center">
+      <h4 class="mb-0 f1-title">👤 Criar Conta</h4>
+    </div>
+    <div class="card-body f1-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex justify-content-between mt-3">
+          <a href="{% url 'login' %}" class="btn btn-outline-light">Voltar</a>
+          <button type="submit" class="btn f1-btn">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

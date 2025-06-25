@@ -1,0 +1,155 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Relatórios{% endblock %}
+
+{% block extra_head %}
+<style>
+  .relatorios-bg {
+    background: linear-gradient(135deg, #0589e0 40%, #024b47 60%);
+    border-radius: 18px;
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .relatorio-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: #4dc9ff;
+    text-shadow: 0 0 8px #4dc9ff, 0 0 16px #0faeff;
+    letter-spacing: 1px;
+  }
+  .kpi-card {
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 20px rgba(0,255,255,0.08);
+    text-align: center;
+    font-size: 1.2rem;
+  }
+  .kpi-card.bg-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+  .kpi-card.bg-danger { background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%); }
+  .kpi-card.bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .kpi-card.bg-info { background: linear-gradient(135deg, #22c1c3 0%, #3f5efb 100%); }
+  .kpi-card.bg-secondary { background: linear-gradient(135deg, #232526 0%, #414345 100%); }
+  .relatorio-card {
+    background: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,255,255,0.08);
+    color: #fff;
+    margin-bottom: 2rem;
+    padding: 1.5rem 1.2rem;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .relatorio-card .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="relatorios-bg">
+    <h1 class="relatorio-title mb-4 text-center">
+        <i class="fas fa-chart-bar"></i> Relatórios
+    </h1>
+    <!-- Cards de Resumo -->
+    <div class="row mb-4 text-center">
+        <div class="col-md-2 col-6">
+            <div class="kpi-card bg-success">
+                <div>Clientes</div>
+                <div class="fs-3 fw-bold">{{ total_clientes }}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="kpi-card bg-primary">
+                <div>Pedidos</div>
+                <div class="fs-3 fw-bold">{{ total_pedidos }}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="kpi-card bg-info">
+                <div>Total Vendido</div>
+                <div class="fs-3 fw-bold">R$ {{ total_vendido|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="kpi-card bg-secondary">
+                <div>Produtos</div>
+                <div class="fs-3 fw-bold">{{ total_produtos }}</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="kpi-card bg-danger">
+                <div>Vendedores</div>
+                <div class="fs-3 fw-bold">{{ total_vendedores }}</div>
+            </div>
+        </div>
+    </div>
+    <!-- Cards dos Relatórios -->
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="relatorio-card">
+                <div>
+                    <h5 class="text-success"><i class="fas fa-chart-bar"></i> Curva ABC de Clientes</h5>
+                    <p>Veja quais clientes são responsáveis pela maior parte do seu faturamento.</p>
+                </div>
+                <a href="{% url 'relatorios:relatorio_abc_clientes' %}" class="btn btn-success btn-3d">
+                    <i class="fas fa-chart-bar"></i> Acessar Relatório
+                </a>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="relatorio-card">
+                <div>
+                    <h5 class="text-danger"><i class="fas fa-user-slash"></i> Clientes sem Compras</h5>
+                    <p>Identifique clientes inativos e oportunidades de reativação.</p>
+                </div>
+                <a href="{% url 'relatorios:relatorio_clientes_sem_compras' %}" class="btn btn-danger btn-3d">
+                    <i class="fas fa-user-slash"></i> Acessar Relatório
+                </a>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="relatorio-card">
+                <div>
+                    <h5 class="text-primary"><i class="fas fa-file-invoice-dollar"></i> DRE</h5>
+                    <p>Demonstração do Resultado do Exercício com gráficos e análise financeira.</p>
+                </div>
+                <a href="{% url 'relatorios:relatorio_dre' %}" class="btn btn-primary btn-3d">
+                    <i class="fas fa-file-invoice-dollar"></i> Acessar Relatório
+                </a>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="relatorio-card">
+                <div>
+                    <h5 class="text-warning"><i class="fas fa-percentage"></i> Margem de Lucro</h5>
+                    <p>Veja a margem de lucro dos seus produtos e identifique oportunidades de melhoria.</p>
+                </div>
+                <a href="{% url 'relatorios:relatorio_margem_lucro' %}" class="btn btn-warning btn-3d">
+                    <i class="fas fa-percentage"></i> Acessar Relatório
+                </a>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="relatorio-card">
+                <div>
+                    <h5 class="text-info"><i class="fas fa-users"></i> Vendas por Vendedor</h5>
+                    <p>Compare o desempenho dos vendedores e acompanhe metas de vendas.</p>
+                </div>
+                <a href="{% url 'relatorios:relatorio_vendas_por_vendedor' %}" class="btn btn-info btn-3d">
+                    <i class="fas fa-users"></i> Acessar Relatório
+                </a>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

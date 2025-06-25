@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1>Relatório de Clientes sem Compras</h1>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label for="inicio">Início:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control" value="{{ inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="fim">Fim:</label>
+            <input type="date" id="fim" name="fim" class="form-control" value="{{ fim }}">
+        </div>
+        <div class="col-auto">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" class="form-select">
+                <option value="">Todas</option>
+                {% for cat, cat_label in categorias %}
+                    <option value="{{ cat }}" {% if categoria == cat %}selected{% endif %}>{{ cat_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="vendedor">Vendedor:</label>
+            <select id="vendedor" name="vendedor" class="form-select">
+                <option value="">Todos</option>
+                {% for vend, vend_label in vendedores %}
+                    <option value="{{ vend }}" {% if vendedor == vend %}selected{% endif %}>{{ vend_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'relatorios:relatorio_clientes_sem_compras_export' %}?inicio={{ inicio }}&fim={{ fim }}&categoria={{ categoria }}&vendedor={{ vendedor }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar para Excel
+            </a>
+        </div>
+    </div>
+</form>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Contato</th>
+            <th>Última Compra</th>
+            <th>Vendedor</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in dados %}
+        <tr>
+            <td>{{ d.nome }}</td>
+            <td>{{ d.contato }}</td>
+            <td>{% if d.ultima_compra %}{{ d.ultima_compra|date:'d/m/Y' }}{% else %}-{% endif %}</td>
+            <td>{{ d.vendedor }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhum cliente sem compras encontrado para o período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} 

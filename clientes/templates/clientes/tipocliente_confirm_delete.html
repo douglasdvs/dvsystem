@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Excluir Tipo de Cliente{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card f1-card mx-auto" style="max-width: 500px;">
+    <div class="card-header bg-danger text-white">
+      <h4 class="mb-0 text-center">Excluir Tipo de Cliente</h4>
+    </div>
+    <div class="card-body f1-body text-center">
+      <p class="mb-4">
+        Tem certeza que deseja excluir o tipo de cliente <strong>{{ object.nome }}</strong>?
+      </p>
+      <form method="post">{% csrf_token %}
+        <a href="{% url 'clientes:tipos_cliente' %}" class="btn btn-secondary me-2">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Excluir
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} 

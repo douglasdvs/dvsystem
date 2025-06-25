@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Modelos de Impressão{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Modelos de Impressão</h1>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Configurações de Impressão</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Modelo de Pedido</label>
+                            <select class="form-control" name="modelo_pedido">
+                                <option value="padrao">Padrão</option>
+                                <option value="simples">Simples</option>
+                                <option value="detalhado">Detalhado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Modelo de Nota Fiscal</label>
+                            <select class="form-control" name="modelo_nf">
+                                <option value="padrao">Padrão</option>
+                                <option value="simples">Simples</option>
+                                <option value="detalhado">Detalhado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Modelo de Etiqueta</label>
+                            <select class="form-control" name="modelo_etiqueta">
+                                <option value="padrao">Padrão</option>
+                                <option value="simples">Simples</option>
+                                <option value="detalhado">Detalhado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Modelo de Relatório</label>
+                            <select class="form-control" name="modelo_relatorio">
+                                <option value="padrao">Padrão</option>
+                                <option value="simples">Simples</option>
+                                <option value="detalhado">Detalhado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

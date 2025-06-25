@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Meus Clientes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="f1-title">Meus Clientes</h1>
+    <div>
+      <a href="{% url 'clientes:tipos_cliente' %}" class="btn btn-outline-info me-2">
+        <i class="fas fa-layer-group"></i> Tipos de Cliente
+      </a>
+      <a href="{% url 'clientes:novo_segmento' %}" class="btn btn-outline-success me-2">
+        <i class="fas fa-tags"></i> Cadastrar Segmento
+      </a>
+      <a href="{% url 'clientes:novo' %}" class="btn f1-btn">➕ Novo Cliente</a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+      <input type="text" name="busca" value="{{ busca }}" class="form-control" placeholder="Buscar nome, CPF/CNPJ, e-mail, telefone...">
+    </div>
+    <div class="col-md-2">
+      <select name="tipo_cliente" class="form-select">
+        <option value="">Tipo de Cliente</option>
+        <option value="todos" {% if tipo_cliente == 'todos' %}selected{% endif %}>Todos</option>
+        {% for tipo in tipos_cliente %}
+        <option value="{{ tipo.id }}" {% if tipo_cliente == tipo.id|stringformat:'s' %}selected{% endif %}>{{ tipo.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="status" class="form-select">
+        <option value="todos" {% if status == 'todos' %}selected{% endif %}>Todos</option>
+        <option value="ativos" {% if status == 'ativos' %}selected{% endif %}>Ativos</option>
+        <option value="inativos" {% if status == 'inativos' %}selected{% endif %}>Inativos</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="uf" class="form-select">
+        <option value="">UF</option>
+        {% for uf in clientes_por_uf.keys %}
+        <option value="{{ uf }}" {% if uf_selected == uf %}selected{% endif %}>{{ uf }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="itens_por_pagina" class="form-select">
+        <option value="10" {% if itens_por_pagina == 10 %}selected{% endif %}>10 por página</option>
+        <option value="25" {% if itens_por_pagina == 25 %}selected{% endif %}>25 por página</option>
+        <option value="50" {% if itens_por_pagina == 50 %}selected{% endif %}>50 por página</option>
+        <option value="100" {% if itens_por_pagina == 100 %}selected{% endif %}>100 por página</option>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filtrar</button>
+    </div>
+  </form>
+  <table class="table table-dark table-hover">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>CEP</th>
+        <th>Cidade/UF</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cliente in clientes %}
+      <tr>
+        <td>{{ cliente.nome }}</td>
+        <td>{{ cliente.cep }}</td>
+        <td>{{ cliente.cidade }}/{{ cliente.uf }}</td>
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonCliente{{ cliente.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-ellipsis-v"></i> Ações
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCliente{{ cliente.pk }}">
+              <li>
+                <a class="dropdown-item" href="{% url 'clientes:editar' cliente.pk %}">
+                  <i class="fas fa-edit text-primary"></i> Editar
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'clientes:excluir' cliente.pk %}" onclick="return confirm('Deseja excluir este cliente?');">
+                  <i class="fas fa-trash text-danger"></i> Excluir
+                </a>
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center f1-empty">Nenhum cliente encontrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

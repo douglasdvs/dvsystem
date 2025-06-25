@@ -1,0 +1,86 @@
+body {
+  /* Gradiente diagonal de vermelho F1 para preto */
+  background: linear-gradient(135deg, #d2e6f3 40%, #024b47 60%);
+  /* Garante que cubra toda a tela */
+  min-height: 10vh;
+  margin: 8;
+}
+
+.f1-card {
+  border: none;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #7babee, #111827);
+  box-shadow: 0 4px 15px rgba(0,255,180,0.2);
+  transition: transform .2s;
+}
+
+.f1-card:hover {
+  transform: translateY(-5px);
+}
+
+.f1-card .card-header {
+  background: linear-gradient(90deg, #06b6d4, #2e4e03);
+  color: #2c0808;
+  font-weight: bold;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.f1-body {
+  background: #270707;
+}
+
+.f1-btn {
+  border: 2px solid #06b6d4;
+  color: #06b6d4;
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 12px;
+  transition: all 0.3s ease;
+}
+
+.f1-btn:hover {
+  background: #06d433;
+  color: #cc7777;
+}
+
+.f1-title {
+  font-family: 'Orbitron', sans-serif;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+}
+
+.f1-edit {
+  color: #ffc107;
+  font-size: 1.2rem;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.f1-delete {
+  color: #dc3545;
+  font-size: 1.2rem;
+  text-decoration: none;
+}
+
+.f1-item {
+  color: #222;
+  background-color: rgba(255,255,255,0.1);
+}
+
+.f1-empty {
+  color: #999;
+}
+
+.f1-btn-outline {
+  border: 2px solid #06b6d4;
+  color: #a50808;
+  background-color: transparent;
+  border-radius: 0.5rem;
+  padding: 0.4rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+.f1-btn-outline:hover {
+  background-color: #183a42;
+  color: #291f1f;
+}

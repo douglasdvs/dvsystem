@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1>Relatório de DRE com Gráficos</h1>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label for="inicio">Início:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control" value="{{ inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="fim">Fim:</label>
+            <input type="date" id="fim" name="fim" class="form-control" value="{{ fim }}">
+        </div>
+        <div class="col-auto">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" class="form-select">
+                <option value="">Todas</option>
+                {% for cat, cat_label in categorias %}
+                    <option value="{{ cat }}" {% if categoria == cat %}selected{% endif %}>{{ cat_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="vendedor">Vendedor:</label>
+            <select id="vendedor" name="vendedor" class="form-select">
+                <option value="">Todos</option>
+                {% for vend, vend_label in vendedores %}
+                    <option value="{{ vend }}" {% if vendedor == vend %}selected{% endif %}>{{ vend_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'relatorios:relatorio_dre_export' %}?inicio={{ inicio }}&fim={{ fim }}&categoria={{ categoria }}&vendedor={{ vendedor }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar para Excel
+            </a>
+        </div>
+    </div>
+</form>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <table class="table table-bordered table-striped">
+            <tbody>
+                <tr><th>Receita Bruta</th><td>R$ {{ dados.receita_bruta|floatformat:2 }}</td></tr>
+                <tr><th>Custos</th><td>R$ {{ dados.custos|floatformat:2 }}</td></tr>
+                <tr><th>Despesas</th><td>R$ {{ dados.despesas|floatformat:2 }}</td></tr>
+                <tr class="table-info"><th>Lucro Operacional</th><td>R$ {{ dados.lucro_operacional|floatformat:2 }}</td></tr>
+                <tr class="table-success"><th>Lucro Líquido</th><td>R$ {{ dados.lucro_liquido|floatformat:2 }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <canvas id="graficoDRE" height="200"></canvas>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('graficoDRE').getContext('2d');
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Custos', 'Despesas', 'Lucro Líquido'],
+        datasets: [{
+            data: [
+                {{ dados.custos|floatformat:2 }},
+                {{ dados.despesas|floatformat:2 }},
+                {{ dados.lucro_liquido|floatformat:2 }}
+            ],
+            backgroundColor: ['#fbc02d', '#1976d2', '#388e3c']
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: ctx => ctx.label + ': R$ ' + ctx.parsed.toLocaleString('pt-BR', {minimumFractionDigits: 2}) } }
+        }
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}
+{% block title %}Tipo de Cliente{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">{% if tipo %}Editar{% else %}Novo{% endif %} Tipo de Cliente</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Salvar</button>
+        <a href="{% url 'clientes:listar_tipos_cliente' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %} 

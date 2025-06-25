@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block title %}Integrações{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Integrações</h2>
+  <a href="{% url 'configuracao:nova_integracao' %}" class="btn btn-primary mb-3">Nova Integração</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Tipo</th>
+        <th>Ativo</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for integracao in integracoes %}
+      <tr>
+        <td>{{ integracao.id }}</td>
+        <td>{{ integracao.nome }}</td>
+        <td>{{ integracao.tipo }}</td>
+        <td>{% if integracao.ativo %}Sim{% else %}Não{% endif %}</td>
+        <td>
+          <a href="{% url 'configuracao:editar_integracao' integracao.id %}" class="btn btn-sm btn-warning">Editar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">Nenhuma integração cadastrada.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'core:home' %}" class="btn btn-secondary">Voltar</a>
+</div>
+{% endblock %}

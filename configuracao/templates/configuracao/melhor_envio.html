@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Melhor Envio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Configurações do Melhor Envio</h1>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Credenciais</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Client ID</label>
+                            <input type="text" class="form-control" name="client_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Client Secret</label>
+                            <input type="password" class="form-control" name="client_secret" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Token de Acesso</label>
+                            <input type="text" class="form-control" name="access_token" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Token de Atualização</label>
+                            <input type="text" class="form-control" name="refresh_token" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Ambiente</label>
+                            <select class="form-control" name="ambiente" required>
+                                <option value="sandbox">Sandbox (Testes)</option>
+                                <option value="production">Produção</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>ID da Loja</label>
+                            <input type="text" class="form-control" name="store_id" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="enable_auto_print" name="enable_auto_print">
+                                <label class="custom-control-label" for="enable_auto_print">Imprimir Etiqueta Automaticamente</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

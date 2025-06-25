@@ -1,0 +1,261 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Novo{% endif %} Produto{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .price-summary {
+        background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        box-shadow: 0 4px 15px rgba(33, 147, 176, 0.2);
+    }
+    
+    .price-summary h5 {
+        color: white;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .price-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .price-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-box me-2"></i>
+                        {% if form.instance.pk %}Editar{% else %}Novo{% endif %} Produto
+                    </h4>
+                    <a href="{% url 'produtos:listar' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-section">
+                            <h5 class="mb-4">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Informações Básicas
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="{{ form.descricao.id_for_label }}" class="form-label">
+                                            Descrição
+                                        </label>
+                                        {{ form.descricao }}
+                                        {% if form.descricao.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.descricao.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                            Categoria
+                                        </label>
+                                        {{ form.categoria }}
+                                        {% if form.categoria.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.categoria.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5 class="mb-4">
+                                <i class="bi bi-currency-dollar me-2"></i>
+                                Preços
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="id_preco_custo" class="form-label">Preço de Custo</label>
+                                        {{ form.preco_custo }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="id_margem_lucro" class="form-label">Margem de Lucro (%)</label>
+                                        {{ form.margem_lucro }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Preço de Venda</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            {{ form.preco_venda }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h5 class="mb-4">
+                                <i class="bi bi-box-seam me-2"></i>
+                                Estoque
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.estoque.id_for_label }}" class="form-label">
+                                            Quantidade em Estoque
+                                        </label>
+                                        {{ form.estoque }}
+                                        {% if form.estoque.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.estoque.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.estoque_minimo.id_for_label }}" class="form-label">
+                                            Estoque Mínimo
+                                        </label>
+                                        {{ form.estoque_minimo }}
+                                        {% if form.estoque_minimo.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.estoque_minimo.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.unidade_medida.id_for_label }}" class="form-label">
+                                            Unidade de Medida
+                                        </label>
+                                        {{ form.unidade_medida }}
+                                        {% if form.unidade_medida.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.unidade_medida.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-check">
+                                {{ form.ativo }}
+                                <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                    Produto Ativo
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{% url 'produtos:listar' %}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>Salvar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.jQuery) {
+            $('.select2').select2({ theme: 'bootstrap-5' });
+        }
+        let modo = 'auto'; // 'auto' = calcula venda pela margem, 'manual' = calcula margem pela venda
+        const custoInput = document.getElementById('id_preco_custo');
+        const margemInput = document.getElementById('id_margem_lucro');
+        const vendaInput = document.getElementById('id_preco_venda');
+
+        function calcularVenda() {
+            let custo = parseFloat((custoInput.value || '').replace(',', '.')) || 0;
+            let margem = parseFloat((margemInput.value || '').replace(',', '.')) || 0;
+            let venda = custo * (1 + (margem / 100));
+            vendaInput.value = venda.toFixed(2);
+        }
+        function calcularMargem() {
+            let custo = parseFloat((custoInput.value || '').replace(',', '.')) || 0;
+            let venda = parseFloat((vendaInput.value || '').replace(',', '.')) || 0;
+            let margem = custo > 0 ? ((venda / custo) - 1) * 100 : 0;
+            margemInput.value = margem.toFixed(2);
+        }
+        custoInput.addEventListener('input', function() {
+            if (modo === 'auto') calcularVenda();
+            else calcularMargem();
+        });
+        margemInput.addEventListener('input', function() {
+            modo = 'auto';
+            calcularVenda();
+        });
+        vendaInput.addEventListener('input', function() {
+            modo = 'manual';
+            calcularMargem();
+        });
+        calcularVenda();
+    });
+</script>
+{% endblock %}

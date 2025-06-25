@@ -1,0 +1,64 @@
+
+/* Card 3D */
+.shadow-3d {
+  background: #12121f;
+  box-shadow:
+    6px 6px 16px rgba(0,0,0,0.9),
+    -6px -6px 16px rgba(255,255,255,0.05),
+    inset 3px 3px 5px rgba(255,255,255,0.05),
+    inset -3px -3px 5px rgba(0,0,0,0.8);
+  border-radius: 1.5rem;
+  border: 1px solid #252540;
+}
+
+/* Inputs com sombra e borda 3D */
+.shadow-input-3d {
+  border-radius: 0.7rem;
+  border: 3px solid #2b2b45;
+  box-shadow:
+    2px 2px 6px rgba(0,0,0,0.8),
+    -2px -2px 6px rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+  background-color: #1c1c2e;
+  color: #d9f1ff;
+}
+
+.shadow-input-3d:focus {
+  outline: none;
+  border-color: #4dc9ff;
+  box-shadow:
+    0 0 8px #4dc9ff,
+    inset 1px 1px 5px rgba(77,201,255,0.6);
+  background-color: #12121f;
+  color: #a0e7ff;
+}
+
+/* Botões com relevo 3D */
+.btn-3d {
+  background: linear-gradient(145deg, #198754, #146c43);
+  border: none;
+  box-shadow:
+    4px 4px 8px rgba(0,0,0,0.7),
+    -4px -4px 8px rgba(72,180,97,0.7);
+  color: #d1f5d3;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-3d:hover {
+  background: linear-gradient(145deg, #146c43, #198754);
+  box-shadow:
+    inset 4px 4px 8px rgba(0,0,0,0.9),
+    inset -4px -4px 8px rgba(72,180,97,0.9);
+  color: #e0f9e0;
+}
+
+/* Texto neon 3D */
+.neon-text-3d {
+  color: #ff4d4d;
+  text-shadow:
+    0 0 6px #4dc9ff,
+    0 0 12px #0faeff,
+    0 0 18px #0faeff;
+}

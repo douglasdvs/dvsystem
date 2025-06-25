@@ -1,0 +1,179 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Permissões{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Grupos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.grupo_padrao.id_for_label }}" class="form-label">Grupo Padrão</label>
+                        {{ form.grupo_padrao }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.criar_grupo_automatico }}
+                            <label class="form-check-label" for="{{ form.criar_grupo_automatico.id_for_label }}">
+                                Criar grupo automaticamente para novos usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.herdar_permissoes }}
+                            <label class="form-check-label" for="{{ form.herdar_permissoes.id_for_label }}">
+                                Herdar permissões do grupo pai
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Permissões</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.verificar_permissoes }}
+                            <label class="form-check-label" for="{{ form.verificar_permissoes.id_for_label }}">
+                                Verificar permissões em cada requisição
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.cache_permissoes }}
+                            <label class="form-check-label" for="{{ form.cache_permissoes.id_for_label }}">
+                                Usar cache de permissões
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_cache_permissoes.id_for_label }}" class="form-label">Tempo de Cache (minutos)</label>
+                        {{ form.tempo_cache_permissoes }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Permissões por Módulo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.permissoes_usuarios.id_for_label }}" class="form-label">Usuários</label>
+                        {{ form.permissoes_usuarios }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.permissoes_grupos.id_for_label }}" class="form-label">Grupos</label>
+                        {{ form.permissoes_grupos }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.permissoes_configuracoes.id_for_label }}" class="form-label">Configurações</label>
+                        {{ form.permissoes_configuracoes }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.permissoes_logs.id_for_label }}" class="form-label">Logs</label>
+                        {{ form.permissoes_logs }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Permissões Especiais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.superusuario }}
+                            <label class="form-check-label" for="{{ form.superusuario.id_for_label }}">
+                                Superusuário
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.staff }}
+                            <label class="form-check-label" for="{{ form.staff.id_for_label }}">
+                                Staff
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.ativo }}
+                            <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                Usuário Ativo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção múltipla
+        $('select[multiple]').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Atualizar permissões quando o grupo padrão mudar
+        $('#{{ form.grupo_padrao.id_for_label }}').change(function() {
+            var grupoId = $(this).val();
+            if (grupoId) {
+                $.ajax({
+                    url: '{% url "configuracao:obter_permissoes_grupo" %}',
+                    method: 'GET',
+                    data: {
+                        'grupo_id': grupoId
+                    },
+                    success: function(response) {
+                        // Atualizar permissões com base no grupo selecionado
+                        response.permissoes.forEach(function(permissao) {
+                            $('select[multiple]').each(function() {
+                                var select = $(this);
+                                select.find('option').each(function() {
+                                    if (response.permissoes.includes($(this).val())) {
+                                        $(this).prop('selected', true);
+                                    }
+                                });
+                                select.trigger('change');
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

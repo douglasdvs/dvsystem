@@ -1,0 +1,357 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Usuário{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Perfil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
+                        {{ form.nome }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone</label>
+                        {{ form.telefone }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.foto.id_for_label }}" class="form-label">Foto</label>
+                        {{ form.foto }}
+                        {% if form.foto.value %}
+                            <div class="mt-2">
+                                <img src="{{ form.foto.value.url }}" alt="Foto do usuário" class="img-thumbnail" style="max-width: 150px;">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Senha</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.senha_atual.id_for_label }}" class="form-label">Senha Atual</label>
+                        {{ form.senha_atual }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.nova_senha.id_for_label }}" class="form-label">Nova Senha</label>
+                        {{ form.nova_senha }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.confirmar_senha.id_for_label }}" class="form-label">Confirmar Senha</label>
+                        {{ form.confirmar_senha }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Preferências</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.idioma.id_for_label }}" class="form-label">Idioma</label>
+                        {{ form.idioma }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.fuso_horario.id_for_label }}" class="form-label">Fuso Horário</label>
+                        {{ form.fuso_horario }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.formato_data.id_for_label }}" class="form-label">Formato de Data</label>
+                        {{ form.formato_data }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.formato_hora.id_for_label }}" class="form-label">Formato de Hora</label>
+                        {{ form.formato_hora }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_email }}
+                            <label class="form-check-label" for="{{ form.notificar_email.id_for_label }}">
+                                Notificar por Email
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_sms }}
+                            <label class="form-check-label" for="{{ form.notificar_sms.id_for_label }}">
+                                Notificar por SMS
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_push }}
+                            <label class="form-check-label" for="{{ form.notificar_push.id_for_label }}">
+                                Notificar por Push
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Segurança</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.autenticacao_2fatores }}
+                            <label class="form-check-label" for="{{ form.autenticacao_2fatores.id_for_label }}">
+                                Autenticação em 2 Fatores
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.lembrar_dispositivo }}
+                            <label class="form-check-label" for="{{ form.lembrar_dispositivo.id_for_label }}">
+                                Lembrar Dispositivo
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.verificar_ip }}
+                            <label class="form-check-label" for="{{ form.verificar_ip.id_for_label }}">
+                                Verificar IP
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.verificar_localizacao }}
+                            <label class="form-check-label" for="{{ form.verificar_localizacao.id_for_label }}">
+                                Verificar Localização
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="btn-testar-2fa">
+                            Testar 2FA
+                        </button>
+                        <div id="status-2fa" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Testando autenticação em 2 fatores...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" id="btn-verificar-ip">
+                            Verificar IP
+                        </button>
+                        <div id="status-ip" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando IP...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" id="btn-verificar-senha">
+                            Verificar Senha
+                        </button>
+                        <div id="status-senha" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando força da senha...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção
+        $('select').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Inicializar máscara para telefone
+        $('#{{ form.telefone.id_for_label }}').mask('(00) 00000-0000');
+        
+        // Inicializar datepicker para campos de data
+        $('#{{ form.formato_data.id_for_label }}').datepicker({
+            format: 'dd/mm/yyyy',
+            language: 'pt-BR',
+            autoclose: true
+        });
+        
+        // Inicializar timepicker para campos de hora
+        $('#{{ form.formato_hora.id_for_label }}').timepicker({
+            format: 'HH:mm',
+            showMeridian: false
+        });
+        
+        // Validar senha
+        $('#{{ form.confirmar_senha.id_for_label }}').on('input', function() {
+            var novaSenha = $('#{{ form.nova_senha.id_for_label }}').val();
+            var confirmarSenha = $(this).val();
+            
+            if (novaSenha !== confirmarSenha) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        // Validar email
+        $('#{{ form.email.id_for_label }}').on('input', function() {
+            var email = $(this).val();
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email)) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        // Validar telefone
+        $('#{{ form.telefone.id_for_label }}').on('input', function() {
+            var telefone = $(this).val();
+            var telefoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
+            
+            if (!telefoneRegex.test(telefone)) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        // Atualizar tema quando o modo escuro mudar
+        $('#{{ form.modo_escuro.id_for_label }}').change(function() {
+            var modoEscuro = $(this).is(':checked');
+            if (modoEscuro) {
+                $('body').addClass('dark-mode');
+            } else {
+                $('body').removeClass('dark-mode');
+            }
+        });
+        
+        // Atualizar menu quando a opção de menu recolhido mudar
+        $('#{{ form.menu_recolhido.id_for_label }}').change(function() {
+            var menuRecolhido = $(this).is(':checked');
+            if (menuRecolhido) {
+                $('body').addClass('sidebar-collapse');
+            } else {
+                $('body').removeClass('sidebar-collapse');
+            }
+        });
+        
+        // Testar 2FA
+        $('#btn-testar-2fa').click(function() {
+            $('#status-2fa').show();
+            $.ajax({
+                url: '{% url "configuracao:testar_2fa" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-2fa .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Teste de 2FA iniciado com sucesso!');
+                },
+                error: function() {
+                    $('#status-2fa .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao testar 2FA.');
+                }
+            });
+        });
+        
+        // Verificar IP
+        $('#btn-verificar-ip').click(function() {
+            $('#status-ip').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_ip" %}',
+                method: 'GET',
+                success: function(response) {
+                    $('#status-ip .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('IP verificado com sucesso!');
+                },
+                error: function() {
+                    $('#status-ip .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar IP.');
+                }
+            });
+        });
+        
+        // Verificar senha
+        $('#btn-verificar-senha').click(function() {
+            $('#status-senha').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_senha" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-senha .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Senha verificada com sucesso!');
+                },
+                error: function() {
+                    $('#status-senha .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar senha.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

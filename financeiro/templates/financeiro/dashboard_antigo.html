@@ -1,0 +1,117 @@
+{% extends 'core/base.html' %}
+{% load static %}
+<!— resto do cabeçalho —>
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4 f1-title">Módulo Financeiro</h1>
+
+  <!-- Formulário de filtro por intervalo de datas -->
+  <form method="get" class="row g-3 mb-4 align-items-end">
+    <div class="col-md-4">
+      <label for="start" class="form-label text-light">Data Início</label>
+      <input type="date" id="start" name="start" value="{{ start }}" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label for="end" class="form-label text-light">Data Fim</label>
+      <input type="date" id="end" name="end" value="{{ end }}" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn f1-btn w-100">🔍 Filtrar</button>
+    </div>
+  </form>
+
+  <!-- Resumo Financeiro -->
+  <div class="row mb-5">
+    <div class="col-md-4">
+      <div class="card f1-card text-center">
+        <div class="card-header">Total Despesas</div>
+        <div class="card-body f1-body">
+          <h3>R$ {{ total_despesas|floatformat:2 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card f1-card text-center">
+        <div class="card-header">Total Receitas</div>
+        <div class="card-body f1-body">
+          <h3>R$ {{ total_receitas|floatformat:2 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card f1-card text-center">
+        <div class="card-header">Diferença</div>
+        <div class="card-body f1-body">
+          <h3>R$ {{ diferenca|floatformat:2 }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abas ou cards de Despesas e Receitas (como antes) -->
+  <div class="row gy-4">
+    <!-- Despesas Card -->
+    <div class="col-lg-6">
+      <div class="card f1-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div><i class="bi bi-coin f1-icon"></i>Despesas</div>
+          <a href="{% url 'financeiro:nova_despesa' %}" class="btn btn-sm f1-btn">➕ Adicionar</a>
+        </div>
+        <div class="card-body f1-body">
+          {% if despesas %}
+            <ul class="list-group list-group-flush">
+              {% for d in despesas %}
+                <li class="list-group-item d-flex justify-content-between bg-transparent f1-item">
+                  <div>
+                    <strong>{{ d.descricao }}</strong><br>
+                    <small>{{ d.data }}</small>
+                  </div>
+                  <div>
+                    R$ {{ d.valor|floatformat:2 }}<br>
+                    <a href="{% url 'financeiro:editar_despesa' d.pk %}" class="f1-edit">✎</a>
+                    <a href="{% url 'financeiro:deletar_despesa' d.pk %}" class="f1-delete">✖</a>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-center f1-empty">Nenhuma despesa registrada.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Receitas Card -->
+    <div class="col-lg-6">
+      <div class="card f1-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div><i class="bi bi-cash-stack f1-icon"></i>Receitas</div>
+          <a href="{% url 'financeiro:nova_receita' %}" class="btn btn-sm f1-btn">➕ Adicionar</a>
+        </div>
+        <div class="card-body f1-body">
+          {% if receitas %}
+            <ul class="list-group list-group-flush">
+              {% for r in receitas %}
+                <li class="list-group-item d-flex justify-content-between bg-transparent f1-item">
+                  <div>
+                    <strong>{{ r.descricao }}</strong><br>
+                    <small>{{ r.data }}</small>
+                  </div>
+                  <div>
+                    R$ {{ r.valor|floatformat:2 }}<br>
+                    <a href="{% url 'financeiro:editar_receita' r.pk %}" class="f1-edit">✎</a>
+                    <a href="{% url 'financeiro:deletar_receita' r.pk %}" class="f1-delete">✖</a>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-center f1-empty">Nenhuma receita registrada.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

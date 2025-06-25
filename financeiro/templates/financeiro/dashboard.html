@@ -1,0 +1,370 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Financeiro{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.kpi-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.kpi-card.receitas {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.kpi-card.despesas {
+    background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+}
+
+.kpi-card.saldo {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.kpi-card.pendentes {
+    background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+}
+
+.chart-container {
+    background: #1e1e1e;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert-item {
+    background: #2a2a2a;
+    border-left: 4px solid #ff6b6b;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="f1-title">
+            <i class="fas fa-chart-line"></i> Dashboard Financeiro
+        </h1>
+        <div class="btn-group">
+            <a href="{% url 'financeiro:listar' %}" class="btn f1-btn">
+                <i class="fas fa-list"></i> Ver Lançamentos
+            </a>
+            <a href="{% url 'financeiro:relatorios' %}" class="btn f1-btn">
+                <i class="fas fa-file-alt"></i> Relatórios
+            </a>
+            <div class="dropdown">
+                <button class="btn f1-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog"></i> Configurações
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'financeiro:centros_custo' %}">
+                        <i class="fas fa-building"></i> Centros de Custo
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'financeiro:nova_receita' %}">
+                        <i class="fas fa-arrow-up text-success"></i> Nova Receita
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'financeiro:nova_despesa' %}">
+                        <i class="fas fa-arrow-down text-danger"></i> Nova Despesa
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card f1-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" class="form-control">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn f1-btn w-100">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="kpi-card receitas">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Receitas Realizadas</h6>
+                        <h3 class="mb-0">R$ {{ total_receitas|floatformat:2 }}</h3>
+                    </div>
+                    <i class="fas fa-arrow-up fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card despesas">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Despesas Realizadas</h6>
+                        <h3 class="mb-0">R$ {{ total_despesas|floatformat:2 }}</h3>
+                    </div>
+                    <i class="fas fa-arrow-down fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card saldo">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Saldo do Período</h6>
+                        <h3 class="mb-0 {% if saldo_periodo < 0 %}text-danger{% endif %}">
+                            R$ {{ saldo_periodo|floatformat:2 }}
+                        </h3>
+                    </div>
+                    <i class="fas fa-balance-scale fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card pendentes">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Pendentes</h6>
+                        <small>Rec: R$ {{ receitas_pendentes|floatformat:2 }}</small><br>
+                        <small>Desp: R$ {{ despesas_pendentes|floatformat:2 }}</small>
+                    </div>
+                    <i class="fas fa-clock fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas -->
+    {% if receitas_atraso or despesas_atraso %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Atenção!</h5>
+                {% if receitas_atraso %}
+                    <div class="alert-item">
+                        <strong>{{ receitas_atraso }}</strong> receita(s) em atraso
+                    </div>
+                {% endif %}
+                {% if despesas_atraso %}
+                    <div class="alert-item">
+                        <strong>{{ despesas_atraso }}</strong> despesa(s) em atraso
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <!-- Fluxo de Caixa -->
+        <div class="col-md-8">
+            <div class="chart-container">
+                <h5 class="text-white mb-3">
+                    <i class="fas fa-chart-line"></i> Fluxo de Caixa (30 dias)
+                </h5>
+                <canvas id="fluxoCaixaChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Receitas por Categoria -->
+        <div class="col-md-4">
+            <div class="chart-container">
+                <h5 class="text-white mb-3">
+                    <i class="fas fa-chart-pie"></i> Receitas por Categoria
+                </h5>
+                <canvas id="receitasCategoriaChart" width="200" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Despesas por Categoria -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="text-white mb-3">
+                    <i class="fas fa-chart-pie"></i> Despesas por Categoria
+                </h5>
+                <canvas id="despesasCategoriaChart" width="200" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Resumo Rápido -->
+        <div class="col-md-6">
+            <div class="card f1-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tachometer-alt"></i> Resumo Rápido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">Meta Mensal</small>
+                            <h4 class="text-success">R$ 10.000,00</h4>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="text-muted">Realizado</small>
+                            <h4>R$ {{ total_receitas|floatformat:2 }}</h4>
+                        </div>
+                        <div class="col-12">
+                        <div class="progress mb-2" aria-label="Progresso da meta mensal">
+                        {% widthratio total_receitas 10000 100 as percentual %}
+                        <div class="progress-bar bg-success" style="width: {{ percentual|default:0 }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                        {{ percentual|default:0 }}% da meta
+                        {% if total_receitas >= 10000 %}
+                        <span class="badge bg-success ms-2">Meta atingida!</span>
+                        {% endif %}
+                        </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dados do fluxo de caixa
+const fluxoData = {{ fluxo_data|safe }};
+
+// Configurar Chart.js para tema escuro
+Chart.defaults.color = '#ffffff';
+Chart.defaults.borderColor = '#404040';
+
+// Gráfico de Fluxo de Caixa
+const fluxoCtx = document.getElementById('fluxoCaixaChart').getContext('2d');
+new Chart(fluxoCtx, {
+    type: 'line',
+    data: {
+        labels: fluxoData.map(d => d.data),
+        datasets: [{
+            label: 'Receitas',
+            data: fluxoData.map(d => d.receitas),
+            borderColor: '#38ef7d',
+            backgroundColor: 'rgba(56, 239, 125, 0.1)',
+            tension: 0.4
+        }, {
+            label: 'Despesas',
+            data: fluxoData.map(d => d.despesas),
+            borderColor: '#fc466b',
+            backgroundColor: 'rgba(252, 70, 107, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'R$ ' + value.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Receitas por Categoria
+const receitasCtx = document.getElementById('receitasCategoriaChart').getContext('2d');
+const receitasCategoriaData = {{ receitas_por_categoria|safe }};
+new Chart(receitasCtx, {
+    type: 'doughnut',
+    data: {
+        labels: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.categoria) : ['Sem dados'],
+        datasets: [{
+            data: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.total) : [1],
+            backgroundColor: [
+                '#38ef7d',
+                '#667eea',
+                '#fdbb2d',
+                '#fc466b',
+                '#3f5efb'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Despesas por Categoria
+const despesasCtx = document.getElementById('despesasCategoriaChart').getContext('2d');
+const despesasCategoriaData = {{ despesas_por_categoria|safe }};
+new Chart(despesasCtx, {
+    type: 'doughnut',
+    data: {
+        labels: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.categoria) : ['Sem dados'],
+        datasets: [{
+            data: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.total) : [1],
+            backgroundColor: [
+                '#fc466b',
+                '#3f5efb',
+                '#fdbb2d',
+                '#667eea',
+                '#38ef7d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

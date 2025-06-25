@@ -1,0 +1,131 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Pagamento{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações do Mercado Pago</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.mercado_pago_access_token.id_for_label }}" class="form-label">Access Token</label>
+                        {{ form.mercado_pago_access_token }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.mercado_pago_public_key.id_for_label }}" class="form-label">Public Key</label>
+                        {{ form.mercado_pago_public_key }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.mercado_pago_sandbox }}
+                            <label class="form-check-label" for="{{ form.mercado_pago_sandbox.id_for_label }}">
+                                Usar ambiente de testes (Sandbox)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações do PagSeguro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.pagseguro_email.id_for_label }}" class="form-label">E-mail</label>
+                        {{ form.pagseguro_email }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.pagseguro_token.id_for_label }}" class="form-label">Token</label>
+                        {{ form.pagseguro_token }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pagseguro_sandbox }}
+                            <label class="form-check-label" for="{{ form.pagseguro_sandbox.id_for_label }}">
+                                Usar ambiente de testes (Sandbox)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações do PayPal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.paypal_client_id.id_for_label }}" class="form-label">Client ID</label>
+                        {{ form.paypal_client_id }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.paypal_secret.id_for_label }}" class="form-label">Secret</label>
+                        {{ form.paypal_secret }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.paypal_sandbox }}
+                            <label class="form-check-label" for="{{ form.paypal_sandbox.id_for_label }}">
+                                Usar ambiente de testes (Sandbox)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações Gerais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.gateway_padrao.id_for_label }}" class="form-label">Gateway de Pagamento Padrão</label>
+                        {{ form.gateway_padrao }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.dias_vencimento.id_for_label }}" class="form-label">Dias para Vencimento</label>
+                        {{ form.dias_vencimento }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.gerar_boleto }}
+                            <label class="form-check-label" for="{{ form.gerar_boleto.id_for_label }}">
+                                Gerar boleto automaticamente
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.enviar_email_pagamento }}
+                            <label class="form-check-label" for="{{ form.enviar_email_pagamento.id_for_label }}">
+                                Enviar e-mail de pagamento
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+{% endblock %} 

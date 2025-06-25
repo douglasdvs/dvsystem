@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% block title %}Tipos de Cliente{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Tipos de Cliente</h2>
+    <a href="{% url 'clientes:criar_tipo_cliente' %}" class="btn btn-primary mb-3"><i class="bi bi-plus-circle"></i> Novo Tipo</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tipo in tipos %}
+            <tr>
+                <td>{{ tipo.nome }}</td>
+                <td>{{ tipo.descricao }}</td>
+                <td>
+                    <a href="{% url 'clientes:editar_tipo_cliente' tipo.pk %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i> Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Nenhum tipo cadastrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

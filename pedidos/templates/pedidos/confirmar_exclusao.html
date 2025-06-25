@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card f1-card mx-auto" style="max-width:600px;">
+    <div class="card-header text-center">
+      <h4>Confirmar Exclusão de Pedido</h4>
+    </div>
+    <div class="card-body f1-body">
+      <p>Tem certeza que deseja excluir o pedido <strong>{{ pedido.numero_pedido }}</strong>?</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'pedidos:listar' %}" class="btn btn-outline-light">Cancelar</a>
+          <button type="submit" class="btn f1-btn">Excluir Pedido</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

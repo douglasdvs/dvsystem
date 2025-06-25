@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1>Relatório de Margem de Lucro</h1>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label for="inicio">Início:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control" value="{{ inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="fim">Fim:</label>
+            <input type="date" id="fim" name="fim" class="form-control" value="{{ fim }}">
+        </div>
+        <div class="col-auto">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" class="form-select">
+                <option value="">Todas</option>
+                {% for cat, cat_label in categorias %}
+                    <option value="{{ cat }}" {% if categoria == cat %}selected{% endif %}>{{ cat_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="vendedor">Vendedor:</label>
+            <select id="vendedor" name="vendedor" class="form-select">
+                <option value="">Todos</option>
+                {% for vend, vend_label in vendedores %}
+                    <option value="{{ vend }}" {% if vendedor == vend %}selected{% endif %}>{{ vend_label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'relatorios:relatorio_margem_lucro_export' %}?inicio={{ inicio }}&fim={{ fim }}&categoria={{ categoria }}&vendedor={{ vendedor }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar para Excel
+            </a>
+        </div>
+    </div>
+</form>
+<div class="mb-4">
+    <canvas id="graficoMargem" height="80"></canvas>
+</div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Receita</th>
+            <th>Custo</th>
+            <th>Lucro Bruto</th>
+            <th>Margem (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in dados %}
+        <tr>
+            <td>{{ d.produto }}</td>
+            <td>R$ {{ d.receita|floatformat:2 }}</td>
+            <td>R$ {{ d.custo|floatformat:2 }}</td>
+            <td>R$ {{ d.lucro_bruto|floatformat:2 }}</td>
+            <td>{% if d.margem < 0 %}<span class="text-danger">{{ d.margem|floatformat:2 }}%</span>{% else %}{{ d.margem|floatformat:2 }}%{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum dado encontrado para o período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = [{% for d in dados %}'{{ d.produto|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+const data = [{% for d in dados %}{{ d.margem|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+const colors = data.map(v => v < 0 ? '#d32f2f' : '#388e3c');
+const ctx = document.getElementById('graficoMargem').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Margem (%)',
+            data: data,
+            backgroundColor: colors,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ctx.parsed.x.toFixed(2) + '%' } }
+        },
+        scales: {
+            x: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %} 

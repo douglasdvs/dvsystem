@@ -1,0 +1,201 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Cliente{% else %}Novo Cliente{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">
+            {% if form.instance.pk %}
+            <i class="fas fa-user-edit"></i> Editar Cliente
+            {% else %}
+            <i class="fas fa-user-plus"></i> Novo Cliente
+            {% endif %}
+        </h1>
+        <a href="{% url 'clientes:lista' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Informações Básicas -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-user me-1"></i>
+                        Informações Básicas
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.nome.id_for_label }}" class="form-label text-dark">Nome</label>
+                                {{ form.nome|add_class:'form-control' }}
+                                {% if form.nome.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nome.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cpf_cnpj.id_for_label }}" class="form-label text-dark">CPF/CNPJ</label>
+                                {{ form.cpf_cnpj|add_class:'form-control' }}
+                                {% if form.cpf_cnpj.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.cpf_cnpj.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label text-dark">E-mail</label>
+                                {{ form.email|add_class:'form-control' }}
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.telefone.id_for_label }}" class="form-label text-dark">Telefone</label>
+                                {{ form.telefone|add_class:'form-control' }}
+                                {% if form.telefone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.telefone.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Comerciais -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-store me-1"></i>
+                        Informações Comerciais
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tipo_cliente.id_for_label }}" class="form-label text-dark">Tipo de Cliente</label>
+                                {{ form.tipo_cliente|add_class:'form-control' }}
+                                {% if form.tipo_cliente.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo_cliente.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.segmento.id_for_label }}" class="form-label text-dark">Segmento</label>
+                                {{ form.segmento|add_class:'form-control' }}
+                                {% if form.segmento.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.segmento.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.tags.id_for_label }}" class="form-label text-dark">Tags</label>
+                                {{ form.tags|add_class:'form-control' }}
+                                {% if form.tags.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tags.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check form-switch">
+                                    {{ form.ativo }}
+                                    <label class="form-check-label text-dark" for="{{ form.ativo.id_for_label }}">
+                                        Cliente Ativo
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="fas fa-sticky-note me-1"></i>
+                        Observações
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.observacao.id_for_label }}" class="form-label text-dark">Observações</label>
+                                {{ form.observacao|add_class:'form-control' }}
+                                {% if form.observacao.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.observacao.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'clientes:lista' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializa o Select2 para o campo de tags
+        $('#{{ form.tags.id_for_label }}').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Selecione as tags...',
+            allowClear: true
+        });
+
+        // Máscaras para os campos
+        $('#{{ form.cpf_cnpj.id_for_label }}').mask('000.000.000-00', {
+            onKeyPress: function(cpf_cnpj, e, field, options) {
+                const masks = ['000.000.000-000', '00.000.000/0000-00'];
+                const mask = (cpf_cnpj.length > 14) ? masks[1] : masks[0];
+                $('#{{ form.cpf_cnpj.id_for_label }}').mask(mask, options);
+            }
+        });
+
+        $('#{{ form.telefone.id_for_label }}').mask('(00) 00000-0000');
+
+        // Validação do formulário
+        (function() {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    });
+</script>
+{% endblock %} 

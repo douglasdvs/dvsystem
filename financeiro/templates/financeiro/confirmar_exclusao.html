@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card f1-card">
+                <div class="card-header text-center">
+                    <h4 class="text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Confirmar Exclusão
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-4">
+                        Tem certeza que deseja excluir esta {{ tipo }}?
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <strong>{{ objeto.descricao }}</strong><br>
+                        <small>Valor: R$ {{ objeto.valor|floatformat:2 }}</small><br>
+                        <small>Data: {{ objeto.data|date:"d/m/Y" }}</small>
+                    </div>
+
+                    <p class="text-muted small">
+                        <i class="fas fa-info-circle"></i>
+                        Esta ação não pode ser desfeita!
+                    </p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger me-2">
+                            <i class="fas fa-trash"></i> Sim, Excluir
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'financeiro:listar' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

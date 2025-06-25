@@ -1,0 +1,422 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block title %}Novo Pedido{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+  const statusTransitions = {
+    'Pendente': ['Aprovado', 'Reenviar', 'Enviado', 'Entregue', 'Cancelado'],
+    'Aprovado': ['Enviado', 'Entregue', 'Cancelado'],
+    'Enviado': ['Entregue', 'Devolução', 'Pendente'],
+    'Devolução': ['Pendente', 'Reenviar', 'Cancelado'],
+    'Reenviar': ['Entregue', 'Cancelado'],
+    'Cancelado': [],
+    'Entregue': []
+  };
+  $(document).ready(function() {
+    $('#id_cliente').select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      placeholder: 'Digite nome, CPF/CNPJ, email ou telefone...',
+      allowClear: true
+    });
+    $('.produto-select').select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      dropdownCssClass: 'text-dark',
+      containerCssClass: 'text-dark',
+      ajax: {
+        url: '{% url "pedidos:buscar_produtos_ajax" %}',
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+          return {
+            term: params.term
+          };
+        },
+        processResults: function(data) {
+          return {
+            results: data.results.map(function(prod) {
+              return {
+                id: prod.id,
+                text: prod.descricao,
+                preco_venda: prod.preco_venda
+              };
+            })
+          };
+        },
+        cache: true
+      },
+      placeholder: 'Selecione um produto',
+      allowClear: true
+    });
+    flatpickr('#id_data_entrega_prevista', {
+      dateFormat: 'Y-m-d',
+      locale: 'pt',
+      disable: [function(date) {
+        return (date.getDay() === 0 || date.getDay() === 6);
+      }],
+      minDate: 'today'
+    });
+    $('#delivery-days').on('input', function() {
+      let days = parseInt($(this).val());
+      if (isNaN(days) || days < 1) return;
+      let date = new Date();
+      let added = 0;
+      while (added < days) {
+        date.setDate(date.getDate() + 1);
+        if (date.getDay() !== 0 && date.getDay() !== 6) {
+          added++;
+        }
+      }
+      $('#id_data_entrega_prevista').val(flatpickr.formatDate(date, 'd/m/Y'));
+    });
+    function calcularSubtotal(linha) {
+      const quantidade = parseFloat(linha.find('input[name$="-quantidade"]').val()) || 0;
+      const preco = parseFloat(linha.find('input[name$="-preco_unitario"]').val()) || 0;
+      const desconto = parseFloat(linha.find('input[name$="-desconto_item"]').val()) || 0;
+      const subtotal = (quantidade * preco) - desconto;
+      linha.find('.pedido-subtotal-display').val(subtotal.toFixed(2));
+    }
+    $(document).on('input', 'input[name$="-quantidade"], input[name$="-preco_unitario"], input[name$="-desconto_item"]', function() {
+      const linha = $(this).closest('tr');
+      calcularSubtotal(linha);
+      calcularTotalPedido();
+    });
+    // Handler para django-select2: busca preço ao mudar produto
+    $(document).on('change', '.produto-select', function(e) {
+      const produtoId = $(this).val();
+      const linha = $(this).closest('tr');
+      const inputPreco = linha.find('input[name$="-preco_unitario"]');
+      if (produtoId) {
+        $.ajax({
+          url: '{% url "pedidos:ajax_preco_produto" %}',
+          data: { produto_id: produtoId },
+          dataType: 'json',
+          success: function(resp) {
+            if (resp.preco !== undefined && resp.preco !== null) {
+              inputPreco.val(parseFloat(resp.preco).toFixed(2));
+              calcularSubtotal(linha);
+              calcularTotalPedido();
+            }
+          }
+        });
+      }
+    });
+    $(document).on('click', '#add-item', function() {
+      const totalForms = $('#id_itens-TOTAL_FORMS');
+      const formIdx = totalForms.val();
+      const emptyFormHtml = $('#empty-form').html().replace(/__prefix__/g, formIdx);
+      $('#pedido-itens-tbody').append(emptyFormHtml);
+      totalForms.val(parseInt(formIdx) + 1);
+
+      // Inicializa select2 no novo campo, removendo qualquer instância anterior
+      const $novoSelect = $('#pedido-itens-tbody .produto-select').last();
+      if ($novoSelect.hasClass('select2-hidden-accessible')) {
+        $novoSelect.select2('destroy');
+      }
+      $novoSelect.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        dropdownCssClass: 'text-dark',
+        containerCssClass: 'text-dark',
+        ajax: {
+          url: '{% url "pedidos:buscar_produtos_ajax" %}',
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return { term: params.term };
+          },
+          processResults: function(data) {
+            return {
+              results: data.results.map(function(prod) {
+                return { id: prod.id, text: prod.descricao, preco_venda: prod.preco_venda };
+              })
+            };
+          },
+          cache: true
+        },
+        placeholder: 'Digite descrição ou categoria do produto...',
+        allowClear: true
+      });
+      // Força o select2-container a ocupar 100% da largura do td
+      $novoSelect.next('.select2-container').css('width', '100%');
+      // Calcula subtotal do novo item
+      const novaLinha = $('#pedido-itens-tbody tr').last();
+      calcularSubtotal(novaLinha);
+      calcularTotalPedido();
+    });
+    $(document).on('click', '.pedido-remove-btn', function() {
+      $(this).closest('tr').remove();
+      calcularTotalPedido();
+    });
+    $('#id_status').on('change', function() {
+      let current = $(this).val();
+      let options = statusTransitions[current] || [];
+      let $next = $('#next-status');
+      $next.empty();
+      if (options.length === 0) {
+        $next.append('<option value="">Sem transição</option>');
+        $next.prop('disabled', true);
+      } else {
+        $next.prop('disabled', false);
+        options.forEach(function(opt) {
+          $next.append('<option value="'+opt+'">'+opt+'</option>');
+        });
+      }
+    });
+    function calcularTotalPedido() {
+      let total = 0;
+      $('.pedido-subtotal-display').each(function() {
+        let v = parseFloat($(this).val());
+        if (!isNaN(v)) total += v;
+      });
+      let taxa = parseFloat($('#id_taxa_entrega').val()) || 0;
+      let desconto = parseFloat($('#id_desconto').val()) || 0;
+      total = total + taxa - desconto;
+      $('#total_pedido').text(total.toFixed(2));
+    }
+    $('#id_taxa_entrega, #id_desconto').on('input', calcularTotalPedido);
+    // Recalcula subtotais e total ao carregar a página
+    $('#pedido-itens-tbody tr').each(function() {
+      calcularSubtotal($(this));
+      // Garante que o campo subtotal nunca fique em branco
+      var subtotalInput = $(this).find('.pedido-subtotal-display');
+      if (!subtotalInput.val() || isNaN(parseFloat(subtotalInput.val()))) {
+        subtotalInput.val('0.00');
+      }
+    });
+    calcularTotalPedido();
+    // Garante que todos os selects tenham cor escura
+    $('.produto-select').each(function() {
+      $(this).next('.select2-container').addClass('text-dark');
+    });
+
+    // Atualiza valor restante a receber
+    function atualizarValorRestante() {
+      let totalPedido = parseFloat($('#total_pedido').text().replace(',', '.')) || 0;
+      let valorRecebido = parseFloat($('#id_valor_recebido').val().replace(',', '.')) || 0;
+      let restante = totalPedido - valorRecebido;
+      let texto = 'R$ ' + restante.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      $('#valor-restante-receber').text(texto);
+    }
+    $('#id_valor_recebido').on('input', atualizarValorRestante);
+    // Atualiza ao carregar a página
+    atualizarValorRestante();
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <form method="post" enctype="multipart/form-data" id="pedido-form">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          <strong>Erros no formulário:</strong>
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Dados do Pedido</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-4 mb-3">
+            <div class="col-md-4">
+              <label class="form-label text-dark">{{ form.cliente.label|upper }}</label>
+              <div class="input-group">
+                {{ form.cliente|add_class:'form-control' }}
+                <a href="{% url 'clientes:novo' %}" class="btn btn-outline-primary" target="_blank" title="Cadastrar novo cliente">
+                  <i class="bi bi-person-plus"></i> Novo Cliente
+                </a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">{{ form.vendedor.label|upper }}</label>
+              {{ form.vendedor|add_class:'form-control' }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">Status Atual</label>
+              {{ form.status|add_class:'form-control' }}
+            </div>
+          </div>
+          <div class="row g-4 mb-3">
+            <div class="col-md-4">
+              <label class="form-label text-dark">Próximo Status</label>
+              <select id="next-status" name="next_status" class="form-select" disabled>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">{{ form.prioridade.label|upper }}</label>
+              {{ form.prioridade|add_class:'form-control' }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">{{ form.forma_pagamento.label|upper }}</label>
+              {{ form.forma_pagamento|add_class:'form-control' }}
+            </div>
+          </div>
+          <div class="row g-4 mb-3">
+            <div class="col-md-4">
+              <label class="form-label text-dark">Previsão de Entrega</label>
+              <div class="input-group">
+                {{ form.data_entrega_prevista|add_class:'form-control' }}
+                <input type="number" id="delivery-days" class="form-control" placeholder="Dias úteis" min="1" style="max-width:120px;">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">Forma de Envio</label>
+              {{ form.forma_envio|add_class:'form-control' }}
+            </div>
+          </div>
+          <div class="row g-4 mb-3">
+            <div class="col-md-4">
+              <label class="form-label text-dark">Upload da Arte Aprovada</label>
+              {{ form.arquivo_arte_aprovada|add_class:'form-control' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+          <h5 class="mb-0"><i class="bi bi-list me-2"></i>Itens do Pedido</h5>
+          <button type="button" class="btn btn-success" id="add-item">
+            <i class="bi bi-plus"></i> Adicionar Item
+          </button>
+        </div>
+        <div class="card-body">
+          {{ formset.management_form }}
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle bg-white">
+              <thead class="table-light">
+                <tr>
+                  <th class="fw-bold text-dark">Produto</th>
+                  <th class="fw-bold text-dark">Quantidade</th>
+                  <th class="fw-bold text-dark">Preço Unitário</th>
+                  <th class="fw-bold text-dark">Desconto</th>
+                  <th class="fw-bold text-dark">Subtotal</th>
+                  <th class="fw-bold text-dark">Observações</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="pedido-itens-tbody">
+                {% for form in formset %}
+                <tr>
+                  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                  <td>{{ form.produto|add_class:'form-control produto-select' }}</td>
+                  <td>{{ form.quantidade|add_class:'form-control' }}</td>
+                  <td>{{ form.preco_unitario|add_class:'form-control' }}</td>
+                  <td>{{ form.desconto_item|add_class:'form-control' }}</td>
+                  <td><input type="text" class="form-control pedido-subtotal-display" readonly></td>
+                  <td>{{ form.observacoes|add_class:'form-control' }}</td>
+                  <td>
+                    {% if not forloop.first or formset|length > 1 %}
+                    <button type="button" class="btn btn-danger pedido-remove-btn" title="Remover item">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <template id="empty-form">
+            <tr>
+              {% for hidden in formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+              <td>{{ formset.empty_form.produto|add_class:'form-control produto-select' }}</td>
+              <td>{{ formset.empty_form.quantidade|add_class:'form-control' }}</td>
+              <td>{{ formset.empty_form.preco_unitario|add_class:'form-control' }}</td>
+              <td>{{ formset.empty_form.desconto_item|add_class:'form-control' }}</td>
+              <td><input type="text" class="form-control pedido-subtotal-display" readonly></td>
+              <td>{{ formset.empty_form.observacoes|add_class:'form-control' }}</td>
+              <td>
+                <button type="button" class="btn btn-danger pedido-remove-btn" title="Remover item">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </template>
+        </div>
+      </div>
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Totais</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-4 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label text-dark">Desconto</label>
+              {{ form.desconto|add_class:'form-control' }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-dark">Taxa Entrega</label>
+              {{ form.taxa_entrega|add_class:'form-control' }}
+            </div>
+            <div class="col-md-4 text-end">
+              <div class="h4 text-success mb-0">TOTAL DO PEDIDO: R$ <span id="total_pedido">0.00</span></div>
+            </div>
+          </div>
+          <div class="row g-4 align-items-end mt-3">
+            <div class="col-md-4">
+              <label class="form-label text-dark">Valor Recebido</label>
+              {{ form.valor_recebido|add_class:'form-control' }}
+              <div class="form-text mt-1">
+                Valor restante a receber: <span id="valor-restante-receber">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Observações Gerais</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label text-dark">{{ form.observacoes.label|upper }}</label>
+              {{ form.observacoes|add_class:'form-control' }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-dark">{{ form.observacoes_internas.label|upper }}</label>
+              {{ form.observacoes_internas|add_class:'form-control' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-3 justify-content-end mb-4">
+        <a href="{% url 'pedidos:listar' %}" class="btn btn-danger">
+          <i class="bi bi-x-lg"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-save"></i> Salvar Pedido
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

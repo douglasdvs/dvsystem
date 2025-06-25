@@ -1,0 +1,179 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} Cliente{% endblock %}
+
+{% block extra_css %}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+  {# Exibe erros de validação sem mexer no seu layout #}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        {% for field, errs in form.errors.items %}
+          {% for err in errs %}
+            <li><strong>{{ field }}:</strong> {{ err }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="container py-5">
+    <div class="card f1-card mx-auto" style="max-width:600px;">
+      <div class="card-header">
+        <h4 class="f1-title text-center">{{ titulo }} Cliente</h4>
+      </div>
+      <div class="card-body f1-body">
+        <form method="post" id="cliente-form">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
+            {{ form.nome }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.cpf_cnpj.id_for_label }}" class="form-label">CPF/CNPJ</label>
+            {{ form.cpf_cnpj }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.email.id_for_label }}" class="form-label">E-mail</label>
+            {{ form.email }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone</label>
+            {{ form.telefone }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.cep.id_for_label }}" class="form-label">CEP</label>
+            {{ form.cep }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.endereco.id_for_label }}" class="form-label">Endereço</label>
+            {{ form.endereco }}
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="{{ form.numero.id_for_label }}" class="form-label">Número</label>
+              {{ form.numero }}
+            </div>
+            <div class="col-md-8 mb-3">
+              <label for="{{ form.complemento.id_for_label }}" class="form-label">Complemento</label>
+              {{ form.complemento }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.bairro.id_for_label }}" class="form-label">Bairro</label>
+            {{ form.bairro }}
+          </div>
+
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label for="{{ form.cidade.id_for_label }}" class="form-label">Cidade</label>
+              {{ form.cidade }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="{{ form.uf.id_for_label }}" class="form-label">UF</label>
+              {{ form.uf }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.tipo_cliente.id_for_label }}" class="form-label">Tipo de Cliente</label>
+            {{ form.tipo_cliente }}
+          </div>
+          <div class="mb-3">
+            <label for="{{ form.segmento.id_for_label }}" class="form-label">Segmento</label>
+            {{ form.segmento }}
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              {{ form.ativo }}
+              <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                Cliente Ativo
+              </label>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.observacao.id_for_label }}" class="form-label">Observações</label>
+            {{ form.observacao }}
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'clientes:listar' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" form="cliente-form" class="btn f1-btn">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    console.log('Document ready');
+    
+    // Máscaras para os campos
+    $('#id_cpf_cnpj').mask('000.000.000-00', {
+        onKeyPress: function(cpf_cnpj, e, field, options) {
+            const masks = ['000.000.000-000', '00.000.000/0000-00'];
+            const mask = (cpf_cnpj.length > 14) ? masks[1] : masks[0];
+            $('#id_cpf_cnpj').mask(mask, options);
+        }
+    });
+    
+    $('#id_telefone').mask('(00) 00000-0000');
+    $('#id_cep').mask('00000-000');
+    
+    // Auto preenchimento do endereço
+    $(document).on('blur', '#id_cep', function() {
+        console.log('CEP blur event triggered');
+        const cep = $(this).val().replace(/\D/g, '');
+        console.log('CEP value:', cep);
+        
+        if (cep.length === 8) {
+            console.log('Fetching address data...');
+            $.get(`https://viacep.com.br/ws/${cep}/json/`, function(data) {
+                console.log('Address data received:', data);
+                if (!data.erro) {
+                    $('#id_endereco').val(data.logradouro);
+                    $('#id_bairro').val(data.bairro);
+                    $('#id_cidade').val(data.localidade);
+                    $('#id_uf').val(data.uf);
+                    $('#id_numero').focus();
+                    console.log('Address fields filled successfully');
+                } else {
+                    console.log('CEP not found');
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error fetching address:', textStatus, errorThrown);
+            });
+        }
+    });
+    
+    // Inicializa Select2
+    $('#id_tipo_cliente').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Selecione o tipo de cliente',
+        allowClear: true
+    });
+});
+</script>
+{% endblock %}

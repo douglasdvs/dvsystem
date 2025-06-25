@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Pré-visualização da Importação{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="f1-title">Pré-visualização da Importação</h1>
+  {% if erros %}
+    <div class="alert alert-danger">
+      <ul>
+        {% for erro in erros %}
+          <li>{{ erro }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  {% if preview and not erros %}
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="arquivo" value="{{ arquivo }}">
+      <input type="hidden" name="atualizar_existentes" value="{{ atualizar_existentes }}">
+      <input type="hidden" name="confirmar" value="1">
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              {% for col in colunas %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in preview %}
+              <tr>
+                {% for col in colunas %}
+                  <td>{{ row|get_item:col }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-success mt-3">Confirmar Importação</button>
+      <a href="{% url 'produtos:importar' %}" class="btn btn-secondary mt-3 ms-2">Cancelar</a>
+    </form>
+  {% endif %}
+  {% if not preview %}
+    <div class="alert alert-warning">Nenhum dado para pré-visualizar.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% comment %}
+Filtro customizado para acessar item do dicionário:
+No seu projeto, adicione em templatetags um filtro get_item:
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key, '')
+{% endcomment %} 

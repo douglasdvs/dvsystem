@@ -1,0 +1,291 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Lançamentos Financeiros{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="f1-title">
+            <i class="fas fa-list"></i> Lançamentos Financeiros
+        </h1>
+        <div class="btn-group">
+            <a href="{% url 'financeiro:dashboard' %}" class="btn f1-btn">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <div class="dropdown">
+                <button class="btn f1-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-plus"></i> Novo
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'financeiro:nova_receita' %}">
+                        <i class="fas fa-arrow-up text-success"></i> Nova Receita
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'financeiro:nova_despesa' %}">
+                        <i class="fas fa-arrow-down text-danger"></i> Nova Despesa
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card f1-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-2">
+                    <select name="tipo" class="form-select">
+                        <option value="todos" {% if tipo == 'todos' %}selected{% endif %}>Todos</option>
+                        <option value="receitas" {% if tipo == 'receitas' %}selected{% endif %}>Receitas</option>
+                        <option value="despesas" {% if tipo == 'despesas' %}selected{% endif %}>Despesas</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">Todos os Status</option>
+                        <option value="P" {% if status == 'P' %}selected{% endif %}>Pendente</option>
+                        <option value="R" {% if status == 'R' %}selected{% endif %}>Realizado</option>
+                        <option value="C" {% if status == 'C' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="categoria" class="form-select">
+                        <option value="">Todas Categorias</option>
+                        <option value="pedido">Venda de Pedido</option>
+                        <option value="servico">Prestação de Serviços</option>
+                        <option value="fornecedor">Fornecedor</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="operacional">Operacional</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar por descrição..." class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn f1-btn w-100">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    {% if receitas or despesas %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5>Total Receitas</h5>
+                    <h3>R$ {% for r in receitas %}{{ r.valor|add:0 }}{% empty %}0.00{% endfor %}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h5>Total Despesas</h5>
+                    <h3>R$ {% for d in despesas %}{{ d.valor|add:0 }}{% empty %}0.00{% endfor %}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5>Saldo</h5>
+                    <h3>R$ 0.00</h3> <!-- Calculado via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lista de Receitas -->
+    {% if receitas and tipo in 'receitas,todos' %}
+    <div class="card f1-card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-arrow-up text-success"></i> Receitas</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Cliente</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Vencimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receita in receitas %}
+                        <tr {% if receita.em_atraso %}class="table-warning"{% endif %}>
+                            <td>{{ receita.data|date:"d/m/Y" }}</td>
+                            <td>
+                                {{ receita.descricao }}
+                                {% if receita.pedido %}
+                                    <br><small class="text-muted">Pedido: {{ receita.pedido.numero_pedido }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ receita.cliente.nome|default:"-" }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ receita.get_categoria_display }}</span>
+                            </td>
+                            <td class="text-success">R$ {{ receita.valor|floatformat:2 }}</td>
+                            <td>
+                                {% if receita.status == 'P' %}
+                                    <span class="badge bg-warning">Pendente</span>
+                                {% elif receita.status == 'R' %}
+                                    <span class="badge bg-success">Realizado</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ receita.data_vencimento|date:"d/m/Y"|default:"-" }}
+                                {% if receita.em_atraso %}
+                                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonReceita{{ receita.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i> Ações
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonReceita{{ receita.pk }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:editar_receita' receita.pk %}">
+                                                <i class="fas fa-edit text-primary"></i> Editar
+                                            </a>
+                                        </li>
+                                        {% if receita.status == 'P' %}
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:marcar_realizado' 'receita' receita.pk %}">
+                                                <i class="fas fa-check text-success"></i> Marcar como Realizado
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:deletar_receita' receita.pk %}">
+                                                <i class="fas fa-trash text-danger"></i> Excluir
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lista de Despesas -->
+    {% if despesas and tipo in 'despesas,todos' %}
+    <div class="card f1-card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-arrow-down text-danger"></i> Despesas</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Centro Custo</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Vencimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for despesa in despesas %}
+                        <tr {% if despesa.em_atraso %}class="table-warning"{% endif %}>
+                            <td>{{ despesa.data|date:"d/m/Y" }}</td>
+                            <td>{{ despesa.descricao }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ despesa.get_categoria_display }}</span>
+                            </td>
+                            <td>{{ despesa.centro_custo.nome|default:"-" }}</td>
+                            <td class="text-danger">R$ {{ despesa.valor|floatformat:2 }}</td>
+                            <td>
+                                {% if despesa.status == 'P' %}
+                                    <span class="badge bg-warning">Pendente</span>
+                                {% elif despesa.status == 'R' %}
+                                    <span class="badge bg-success">Realizado</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ despesa.data_vencimento|date:"d/m/Y"|default:"-" }}
+                                {% if despesa.em_atraso %}
+                                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonDespesa{{ despesa.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i> Ações
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonDespesa{{ despesa.pk }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:editar_despesa' despesa.pk %}">
+                                                <i class="fas fa-edit text-primary"></i> Editar
+                                            </a>
+                                        </li>
+                                        {% if despesa.status == 'P' %}
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:marcar_realizado' 'despesa' despesa.pk %}">
+                                                <i class="fas fa-check text-success"></i> Marcar como Realizado
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'financeiro:deletar_despesa' despesa.pk %}">
+                                                <i class="fas fa-trash text-danger"></i> Excluir
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mensagem quando não há dados -->
+    {% if not receitas and not despesas %}
+    <div class="card f1-card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Nenhum lançamento encontrado</h5>
+            <p class="text-muted">Use os filtros acima ou adicione novos lançamentos</p>
+            <div class="mt-3">
+                <a href="{% url 'financeiro:nova_receita' %}" class="btn btn-success me-2">
+                    <i class="fas fa-plus"></i> Nova Receita
+                </a>
+                <a href="{% url 'financeiro:nova_despesa' %}" class="btn btn-danger">
+                    <i class="fas fa-plus"></i> Nova Despesa
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

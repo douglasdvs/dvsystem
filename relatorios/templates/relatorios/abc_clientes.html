@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h1>Relatório de Clientes - Curva ABC</h1>
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label for="inicio">Início:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control" value="{{ inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="fim">Fim:</label>
+            <input type="date" id="fim" name="fim" class="form-control" value="{{ fim }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'relatorios:relatorio_abc_clientes_export' %}?inicio={{ inicio }}&fim={{ fim }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar para Excel
+            </a>
+        </div>
+    </div>
+</form>
+<div class="mb-4">
+    <canvas id="graficoABC" height="80"></canvas>
+</div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Total Comprado</th>
+            <th>% Individual</th>
+            <th>% Acumulado</th>
+            <th>Grupo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in dados %}
+        <tr>
+            <td>{{ d.cliente }}</td>
+            <td>R$ {{ d.total|floatformat:2 }}</td>
+            <td>{{ d.percentual|floatformat:2 }}%</td>
+            <td>{{ d.acumulado|floatformat:2 }}%</td>
+            <td><span class="badge bg-{% if d.grupo == 'A' %}success{% elif d.grupo == 'B' %}warning{% else %}secondary{% endif %}">{{ d.grupo }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum dado encontrado para o período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = [{% for d in dados %}'{{ d.cliente|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+const data = [{% for d in dados %}{{ d.total|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+const grupos = [{% for d in dados %}'{{ d.grupo }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+const colors = grupos.map(g => g === 'A' ? '#388e3c' : (g === 'B' ? '#fbc02d' : '#757575'));
+const ctx = document.getElementById('graficoABC').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Total Comprado',
+            data: data,
+            backgroundColor: colors,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => 'R$ ' + ctx.parsed.x.toLocaleString('pt-BR', {minimumFractionDigits: 2}) } }
+        },
+        scales: {
+            x: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %} 

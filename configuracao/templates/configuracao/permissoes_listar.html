@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Permissões Customizadas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Permissões Customizadas</h2>
+  <a href="{% url 'configuracao:nova_permissao' %}" class="btn btn-success mb-3">
+    <i class="bi bi-plus"></i> Nova Permissão
+  </a>
+  <table class="table table-bordered table-hover bg-white">
+    <thead class="table-light">
+      <tr>
+        <th>Nome</th>
+        <th>Código</th>
+        <th>Grupos</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for permissao in permissoes %}
+      <tr>
+        <td>{{ permissao.nome }}</td>
+        <td>{{ permissao.codigo }}</td>
+        <td>
+          {% for grupo in permissao.grupos.all %}
+            <span class="badge bg-primary">{{ grupo.name }}</span>
+          {% empty %}
+            <span class="text-muted">Nenhum grupo</span>
+          {% endfor %}
+        </td>
+        <td>{{ permissao.descricao }}</td>
+        <td>
+          <a href="{% url 'configuracao:editar_permissao' permissao.pk %}" class="btn btn-primary btn-sm">Editar</a>
+          <a href="{% url 'configuracao:excluir_permissao' permissao.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Nenhuma permissão cadastrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

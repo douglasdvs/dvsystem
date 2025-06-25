@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Tipos de Cliente{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Tipos de Cliente</h1>
+    {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-users-cog me-1"></i>
+                Lista de Tipos de Cliente
+            </div>
+            <a href="{% url 'clientes:criar_tipo_cliente' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Novo Tipo
+            </a>
+        </div>
+        <div class="card-body">
+            {% if tipos %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Clientes</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tipo in tipos %}
+                        <tr>
+                            <td>{{ tipo.nome }}</td>
+                            <td>{{ tipo.descricao|default:"-" }}</td>
+                            <td>{{ tipo.clientes.count }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'clientes:editar_tipo_cliente' tipo.pk %}" 
+                                       class="btn btn-info" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if not tipo.clientes.exists %}
+                                    <a href="{% url 'clientes:excluir_tipo_cliente' tipo.pk %}" 
+                                       class="btn btn-danger" 
+                                       title="Excluir"
+                                       onclick="return confirm('Tem certeza que deseja excluir este tipo de cliente?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Nenhum tipo de cliente cadastrado.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

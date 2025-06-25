@@ -1,0 +1,193 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Tema{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Cores do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária</label>
+                        {{ form.cor_primaria }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária</label>
+                        {{ form.cor_secundaria }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cor_sucesso.id_for_label }}" class="form-label">Cor de Sucesso</label>
+                        {{ form.cor_sucesso }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cor_perigo.id_for_label }}" class="form-label">Cor de Perigo</label>
+                        {{ form.cor_perigo }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cor_alerta.id_for_label }}" class="form-label">Cor de Alerta</label>
+                        {{ form.cor_alerta }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.cor_info.id_for_label }}" class="form-label">Cor de Informação</label>
+                        {{ form.cor_info }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Tema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.tema.id_for_label }}" class="form-label">Tema</label>
+                        {{ form.tema }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.tema_escuro }}
+                            <label class="form-check-label" for="{{ form.tema_escuro.id_for_label }}">
+                                Tema Escuro
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.fonte.id_for_label }}" class="form-label">Fonte</label>
+                        {{ form.fonte }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tamanho_fonte.id_for_label }}" class="form-label">Tamanho da Fonte</label>
+                        {{ form.tamanho_fonte }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Layout</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.layout.id_for_label }}" class="form-label">Layout</label>
+                        {{ form.layout }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.menu_lateral }}
+                            <label class="form-check-label" for="{{ form.menu_lateral.id_for_label }}">
+                                Menu Lateral
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.menu_superior }}
+                            <label class="form-check-label" for="{{ form.menu_superior.id_for_label }}">
+                                Menu Superior
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.menu_compacto }}
+                            <label class="form-check-label" for="{{ form.menu_compacto.id_for_label }}">
+                                Menu Compacto
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Imagem</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">Logo</label>
+                        {{ form.logo }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.favicon.id_for_label }}" class="form-label">Favicon</label>
+                        {{ form.favicon }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.imagem_login.id_for_label }}" class="form-label">Imagem de Login</label>
+                        {{ form.imagem_login }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.imagem_fundo.id_for_label }}" class="form-label">Imagem de Fundo</label>
+                        {{ form.imagem_fundo }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Preview de cores
+        $('input[type="color"]').on('input', function() {
+            $(this).next('.color-preview').css('background-color', $(this).val());
+        });
+        
+        // Preview de imagens
+        $('input[type="file"]').on('change', function() {
+            var file = this.files[0];
+            var reader = new FileReader();
+            var preview = $(this).next('.image-preview');
+            
+            reader.onload = function(e) {
+                preview.attr('src', e.target.result);
+            }
+            
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Aplicar tema
+        $('#{{ form.tema.id_for_label }}, #{{ form.tema_escuro.id_for_label }}').change(function() {
+            var tema = $('#{{ form.tema.id_for_label }}').val();
+            var escuro = $('#{{ form.tema_escuro.id_for_label }}').is(':checked');
+            
+            $('body').removeClass('theme-light theme-dark').addClass(escuro ? 'theme-dark' : 'theme-light');
+            $('body').attr('data-theme', tema);
+        });
+        
+        // Aplicar fonte
+        $('#{{ form.fonte.id_for_label }}, #{{ form.tamanho_fonte.id_for_label }}').change(function() {
+            var fonte = $('#{{ form.fonte.id_for_label }}').val();
+            var tamanho = $('#{{ form.tamanho_fonte.id_for_label }}').val();
+            
+            $('body').css({
+                'font-family': fonte,
+                'font-size': tamanho + 'px'
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

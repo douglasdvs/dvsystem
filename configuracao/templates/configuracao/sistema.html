@@ -1,0 +1,234 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações do Sistema{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Geral</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.nome_sistema.id_for_label }}" class="form-label">Nome do Sistema</label>
+                        {{ form.nome_sistema }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.descricao_sistema.id_for_label }}" class="form-label">Descrição do Sistema</label>
+                        {{ form.descricao_sistema }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.versao_sistema.id_for_label }}" class="form-label">Versão do Sistema</label>
+                        {{ form.versao_sistema }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.ambiente.id_for_label }}" class="form-label">Ambiente</label>
+                        {{ form.ambiente }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Logs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.log_habilitado }}
+                            <label class="form-check-label" for="{{ form.log_habilitado.id_for_label }}">
+                                Log Habilitado
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.nivel_log.id_for_label }}" class="form-label">Nível do Log</label>
+                        {{ form.nivel_log }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.diretorio_log.id_for_label }}" class="form-label">Diretório do Log</label>
+                        {{ form.diretorio_log }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.retencao_log.id_for_label }}" class="form-label">Retenção do Log (dias)</label>
+                        {{ form.retencao_log }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Cache</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.cache_habilitado }}
+                            <label class="form-check-label" for="{{ form.cache_habilitado.id_for_label }}">
+                                Cache Habilitado
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tipo_cache.id_for_label }}" class="form-label">Tipo de Cache</label>
+                        {{ form.tipo_cache }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_cache.id_for_label }}" class="form-label">Tempo de Cache (minutos)</label>
+                        {{ form.tempo_cache }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.memoria_cache.id_for_label }}" class="form-label">Memória do Cache (MB)</label>
+                        {{ form.memoria_cache }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" id="btn-limpar-cache">
+                            Limpar Cache
+                        </button>
+                        <div id="status-cache" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Limpando cache...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" id="btn-limpar-log">
+                            Limpar Log
+                        </button>
+                        <div id="status-log" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Limpando log...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" id="btn-verificar-sistema">
+                            Verificar Sistema
+                        </button>
+                        <div id="status-sistema" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                Verificando sistema...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializar select2 para campos de seleção
+        $('select').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+        
+        // Mostrar/ocultar campos de log baseado na opção de log habilitado
+        $('#{{ form.log_habilitado.id_for_label }}').change(function() {
+            var logHabilitado = $(this).is(':checked');
+            if (logHabilitado) {
+                $('.campo-log').show();
+            } else {
+                $('.campo-log').hide();
+            }
+        }).trigger('change');
+        
+        // Mostrar/ocultar campos de cache baseado na opção de cache habilitado
+        $('#{{ form.cache_habilitado.id_for_label }}').change(function() {
+            var cacheHabilitado = $(this).is(':checked');
+            if (cacheHabilitado) {
+                $('.campo-cache').show();
+            } else {
+                $('.campo-cache').hide();
+            }
+        }).trigger('change');
+        
+        // Limpar cache
+        $('#btn-limpar-cache').click(function() {
+            $('#status-cache').show();
+            $.ajax({
+                url: '{% url "configuracao:limpar_cache" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-cache .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Cache limpo com sucesso!');
+                },
+                error: function() {
+                    $('#status-cache .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao limpar cache.');
+                }
+            });
+        });
+        
+        // Limpar log
+        $('#btn-limpar-log').click(function() {
+            $('#status-log').show();
+            $.ajax({
+                url: '{% url "configuracao:limpar_log" %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#status-log .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Log limpo com sucesso!');
+                },
+                error: function() {
+                    $('#status-log .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao limpar log.');
+                }
+            });
+        });
+        
+        // Verificar sistema
+        $('#btn-verificar-sistema').click(function() {
+            $('#status-sistema').show();
+            $.ajax({
+                url: '{% url "configuracao:verificar_sistema" %}',
+                method: 'GET',
+                success: function(response) {
+                    $('#status-sistema .alert').removeClass('alert-info').addClass('alert-success')
+                        .html('Sistema verificado com sucesso!');
+                },
+                error: function() {
+                    $('#status-sistema .alert').removeClass('alert-info').addClass('alert-danger')
+                        .html('Erro ao verificar sistema.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

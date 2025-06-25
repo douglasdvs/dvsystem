@@ -1,0 +1,179 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Usuários{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Cadastro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_cadastro }}
+                            <label class="form-check-label" for="{{ form.permitir_cadastro.id_for_label }}">
+                                Permitir cadastro de novos usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.aprovar_cadastro }}
+                            <label class="form-check-label" for="{{ form.aprovar_cadastro.id_for_label }}">
+                                Exigir aprovação de novos usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.verificar_email }}
+                            <label class="form-check-label" for="{{ form.verificar_email.id_for_label }}">
+                                Exigir verificação de email
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.grupo_padrao.id_for_label }}" class="form-label">Grupo Padrão</label>
+                        {{ form.grupo_padrao }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Perfil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_avatar }}
+                            <label class="form-check-label" for="{{ form.permitir_avatar.id_for_label }}">
+                                Permitir upload de avatar
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tamanho_maximo_avatar.id_for_label }}" class="form-label">Tamanho Máximo do Avatar (KB)</label>
+                        {{ form.tamanho_maximo_avatar }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_biografia }}
+                            <label class="form-check-label" for="{{ form.permitir_biografia.id_for_label }}">
+                                Permitir biografia
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_redes_sociais }}
+                            <label class="form-check-label" for="{{ form.permitir_redes_sociais.id_for_label }}">
+                                Permitir redes sociais
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Permissões</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_edicao_perfil }}
+                            <label class="form-check-label" for="{{ form.permitir_edicao_perfil.id_for_label }}">
+                                Permitir edição de perfil
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_edicao_email }}
+                            <label class="form-check-label" for="{{ form.permitir_edicao_email.id_for_label }}">
+                                Permitir edição de email
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.permitir_edicao_senha }}
+                            <label class="form-check-label" for="{{ form.permitir_edicao_senha.id_for_label }}">
+                                Permitir edição de senha
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.exigir_senha_atual }}
+                            <label class="form-check-label" for="{{ form.exigir_senha_atual.id_for_label }}">
+                                Exigir senha atual para alterações
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configurações de Privacidade</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.perfil_publico }}
+                            <label class="form-check-label" for="{{ form.perfil_publico.id_for_label }}">
+                                Perfis públicos por padrão
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.mostrar_email }}
+                            <label class="form-check-label" for="{{ form.mostrar_email.id_for_label }}">
+                                Mostrar email nos perfis
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.mostrar_telefone }}
+                            <label class="form-check-label" for="{{ form.mostrar_telefone.id_for_label }}">
+                                Mostrar telefone nos perfis
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.mostrar_ultimo_acesso }}
+                            <label class="form-check-label" for="{{ form.mostrar_ultimo_acesso.id_for_label }}">
+                                Mostrar último acesso
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+{% endblock %} 

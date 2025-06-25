@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedido PDF</title>
+</head>
+<body>
+  <div style="font-family: 'Segoe UI', sans-serif; padding: 24px; max-width: 1000px; margin: auto; color: #333;">
+    <header style="border-bottom: 3px solid #00556d; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <img src="{{ empresa.logo.url }}" alt="Logo" style="height: 60px;">
+      <div style="text-align: right; font-size: 0.9em;">
+        <p><strong>dados do vendedor</strong></p>
+        <p>📞 {{ empresa.telefone }}</p>
+        <p>📱 {{ empresa.celular }}</p>
+        <p>📅 {{ pedido.data|date:"d/m/Y" }}</p>
+      </div>
+    </header>
+
+    <section style="margin-bottom: 24px;">
+      <h2 style="background: #00556d; color: #fff; padding: 8px 16px; border-radius: 4px;">Pedido {{ pedido.codigo }}</h2>
+      <div style="padding: 12px; border: 1px solid #ccc; border-radius: 6px;">
+        <p><strong>Cliente:</strong> {{ pedido.cliente.nome }}</p>
+        <p>{{ pedido.cliente.endereco }}</p>
+        <p>{{ pedido.cliente.cidade }} - {{ pedido.cliente.estado }} | CEP {{ pedido.cliente.cep }}</p>
+        <p>📱 {{ pedido.cliente.telefone }}</p>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 24px;">
+      <h3 style="color: #00556d; margin-bottom: 12px;">Produtos</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f1f1f1;">
+          <tr>
+            <th style="text-align: left; padding: 8px;">Descrição</th>
+            <th style="text-align: center; padding: 8px;">Unid.</th>
+            <th style="text-align: right; padding: 8px;">Preço unitário</th>
+            <th style="text-align: center; padding: 8px;">Qtd.</th>
+            <th style="text-align: right; padding: 8px;">Preço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in pedido.itens.all %}
+          <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 8px;">{{ item.produto.descricao }}</td>
+            <td style="text-align: center;">un.</td>
+            <td style="text-align: right;">R$ {{ item.preco_unitario|floatformat:2 }}</td>
+            <td style="text-align: center;">{{ item.quantidade }}</td>
+            <td style="text-align: right;">R$ {{ item.valor_total|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <p>Produtos: R$ {{ pedido.subtotal|floatformat:2 }}</p>
+        <p>Frete: R$ {{ pedido.taxa_entrega|floatformat:2 }}</p>
+        <p><strong>Subtotal:</strong> R$ {{ pedido.total|floatformat:2 }}</p>
+        <p style="font-size: 1.2em;"><strong>Total:</strong> R$ {{ pedido.total|floatformat:2 }}</strong></p>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 24px;">
+      <h3 style="color: #00556d;">Pagamento</h3>
+      <p><strong>Meios de pagamento:</strong> {{ pedido.get_forma_pagamento_display }}</p>
+      <p><strong>Condições:</strong> Sinal de {{ pedido.valor_sinal|floatformat:2 }} e restante na conclusão.</p>
+    </section>
+
+    {% if pedido.observacoes %}
+    <section style="margin-bottom: 24px;">
+      <h3 style="color: #00556d;">Informações adicionais</h3>
+      <p>{{ pedido.observacoes }}</p>
+    </section>
+    {% endif %}
+
+    <section style="margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 20px;">
+      <h3 style="color: #00556d;">Fotos</h3>
+      {% for anexo in pedido.anexos.all %}
+      <div style="margin-bottom: 10px;">
+        <img src="{{ anexo.arquivo.url }}" alt="Foto Anexada" style="max-width: 100%; height: auto;">
+      </div>
+      {% endfor %}
+    </section>
+
+    <footer style="text-align: center; font-size: 0.9em; margin-top: 30px; color: #999;">
+      Página 1/1
+    </footer>
+  </div>
+</body>
+</html>

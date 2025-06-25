@@ -1,0 +1,208 @@
+{% extends 'configuracao/base_configuracao.html' %}
+
+{% block card_title %}Configurações de Notificações{% endblock %}
+
+{% block card_content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações por Email</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_novo_pedido }}
+                            <label class="form-check-label" for="{{ form.notificar_novo_pedido.id_for_label }}">
+                                Notificar sobre novos pedidos
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_status_pedido }}
+                            <label class="form-check-label" for="{{ form.notificar_status_pedido.id_for_label }}">
+                                Notificar sobre alterações de status
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_pagamento }}
+                            <label class="form-check-label" for="{{ form.notificar_pagamento.id_for_label }}">
+                                Notificar sobre pagamentos
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_estoque }}
+                            <label class="form-check-label" for="{{ form.notificar_estoque.id_for_label }}">
+                                Notificar sobre estoque baixo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações no Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_sistema }}
+                            <label class="form-check-label" for="{{ form.notificar_sistema.id_for_label }}">
+                                Habilitar notificações no sistema
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.tempo_notificacao.id_for_label }}" class="form-label">Tempo de Exibição (segundos)</label>
+                        {{ form.tempo_notificacao }}
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.som_notificacao }}
+                            <label class="form-check-label" for="{{ form.som_notificacao.id_for_label }}">
+                                Reproduzir som nas notificações
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_desktop }}
+                            <label class="form-check-label" for="{{ form.notificar_desktop.id_for_label }}">
+                                Permitir notificações desktop
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações de Usuário</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_novo_usuario }}
+                            <label class="form-check-label" for="{{ form.notificar_novo_usuario.id_for_label }}">
+                                Notificar sobre novos usuários
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_login }}
+                            <label class="form-check-label" for="{{ form.notificar_login.id_for_label }}">
+                                Notificar sobre logins
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_alteracao_senha }}
+                            <label class="form-check-label" for="{{ form.notificar_alteracao_senha.id_for_label }}">
+                                Notificar sobre alterações de senha
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_alteracao_email }}
+                            <label class="form-check-label" for="{{ form.notificar_alteracao_email.id_for_label }}">
+                                Notificar sobre alterações de email
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Notificações de Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_erro }}
+                            <label class="form-check-label" for="{{ form.notificar_erro.id_for_label }}">
+                                Notificar sobre erros do sistema
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_backup }}
+                            <label class="form-check-label" for="{{ form.notificar_backup.id_for_label }}">
+                                Notificar sobre backups
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_atualizacao }}
+                            <label class="form-check-label" for="{{ form.notificar_atualizacao.id_for_label }}">
+                                Notificar sobre atualizações
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.notificar_manutencao }}
+                            <label class="form-check-label" for="{{ form.notificar_manutencao.id_for_label }}">
+                                Notificar sobre manutenção
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        </div>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Teste de notificação
+        $('#btn-teste-notificacao').click(function() {
+            if (Notification.permission === "granted") {
+                var notification = new Notification("Teste de Notificação", {
+                    body: "Esta é uma notificação de teste do sistema.",
+                    icon: "{% static 'img/logo.png' %}"
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === "granted") {
+                        var notification = new Notification("Teste de Notificação", {
+                            body: "Esta é uma notificação de teste do sistema.",
+                            icon: "{% static 'img/logo.png' %}"
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

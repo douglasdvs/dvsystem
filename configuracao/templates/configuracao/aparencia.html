@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cores e Templates{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Cores e Templates</h1>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Configurações de Aparência</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tema do Sistema</label>
+                            <select class="form-control" name="tema">
+                                <option value="claro">Claro</option>
+                                <option value="escuro">Escuro</option>
+                                <option value="auto">Automático</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Cor Principal</label>
+                            <input type="color" class="form-control" name="cor_principal" value="#4e73df">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Cor Secundária</label>
+                            <input type="color" class="form-control" name="cor_secundaria" value="#858796">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Cor de Destaque</label>
+                            <input type="color" class="form-control" name="cor_destaque" value="#1cc88a">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Fonte Principal</label>
+                            <select class="form-control" name="fonte_principal">
+                                <option value="roboto">Roboto</option>
+                                <option value="open-sans">Open Sans</option>
+                                <option value="montserrat">Montserrat</option>
+                                <option value="lato">Lato</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tamanho da Fonte</label>
+                            <select class="form-control" name="tamanho_fonte">
+                                <option value="pequeno">Pequeno</option>
+                                <option value="medio">Médio</option>
+                                <option value="grande">Grande</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Layout do Menu</label>
+                            <select class="form-control" name="layout_menu">
+                                <option value="padrao">Padrão</option>
+                                <option value="compacto">Compacto</option>
+                                <option value="expandido">Expandido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Posição do Menu</label>
+                            <select class="form-control" name="posicao_menu">
+                                <option value="esquerda">Esquerda</option>
+                                <option value="superior">Superior</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

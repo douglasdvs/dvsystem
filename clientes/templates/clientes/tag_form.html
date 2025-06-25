@@ -1,0 +1,139 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Tag{% else %}Nova Tag{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">
+            {% if form.instance.pk %}
+            <i class="fas fa-edit"></i> Editar Tag
+            {% else %}
+            <i class="fas fa-plus"></i> Nova Tag
+            {% endif %}
+        </h1>
+        <a href="{% url 'clientes:tags' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.nome.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.cor.id_for_label }}" class="form-label">Cor</label>
+                        <div class="input-group">
+                            {{ form.cor }}
+                            <span class="input-group-text color-preview" id="colorPreview" style="width: 40px;"></span>
+                        </div>
+                        {% if form.cor.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.cor.errors }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Clique no campo para selecionar uma cor ou digite o código hexadecimal.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="{{ form.descricao.id_for_label }}" class="form-label">Descrição</label>
+                        {{ form.descricao }}
+                        {% if form.descricao.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.descricao.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'clientes:tags' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Inicializa o color picker
+        $('#{{ form.cor.id_for_label }}').colorpicker({
+            format: 'hex',
+            extensions: [
+                {
+                    name: 'swatches',
+                    options: {
+                        colors: {
+                            'primary': '#0d6efd',
+                            'secondary': '#6c757d',
+                            'success': '#198754',
+                            'danger': '#dc3545',
+                            'warning': '#ffc107',
+                            'info': '#0dcaf0',
+                            'light': '#f8f9fa',
+                            'dark': '#212529'
+                        },
+                        namesAsValues: true
+                    }
+                }
+            ]
+        }).on('colorpickerChange', function(event) {
+            $('#colorPreview').css('background-color', event.color.toString());
+        });
+
+        // Atualiza o preview da cor quando o campo é alterado
+        $('#{{ form.cor.id_for_label }}').on('input', function() {
+            var color = $(this).val();
+            if (color) {
+                $('#colorPreview').css('background-color', color);
+            }
+        });
+
+        // Inicializa o preview da cor
+        var initialColor = $('#{{ form.cor.id_for_label }}').val();
+        if (initialColor) {
+            $('#colorPreview').css('background-color', initialColor);
+        }
+
+        // Validação do formulário
+        (function() {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    });
+</script>
+{% endblock %} 
