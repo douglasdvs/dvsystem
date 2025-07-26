@@ -7,7 +7,7 @@
 
   <form method="post">
     {% csrf_token %}
-    <a href="{% url 'produtos:listar' %}" class="btn btn-secondary">Cancelar</a>
+    <a href="{% url 'produtos:index' %}" class="btn btn-secondary">Cancelar</a>
     <button type="submit" class="btn btn-danger">Excluir</button>
   </form>
 </div>

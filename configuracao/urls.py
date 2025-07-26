@@ -1,22 +1,18 @@
 from django.urls import path
+
 from . import views
 
-app_name = 'configuracao'
+app_name = "configuracao"
 
 urlpatterns = [
-    # path('sistema/', views.configuracao_sistema, name='configuracao_sistema'),
-    # path('empresa/', views.configuracao_empresa, name='configuracao_empresa'),
-    # path('integracoes/', views.lista_integracoes, name='lista_integracoes'),
-    # path('integracoes/nova/', views.nova_integracao, name='nova_integracao'),
-    # path('integracoes/<int:pk>/editar/', views.editar_integracao, name='editar_integracao'),
-
-    # Modelos de Impressão
-    path('modelos-impressao/', views.editar_modelo_impressao, name='modelos_impressao'),
-    # (as rotas de CRUD antigas podem ser removidas ou mantidas para outros modelos)
-
-    # Permissões Customizadas
-    # path('permissoes/', views.lista_permissoes, name='lista_permissoes'),
-    # path('permissoes/nova/', views.nova_permissao, name='nova_permissao'),
-    # path('permissoes/<int:pk>/editar/', views.editar_permissao, name='editar_permissao'),
-    # path('permissoes/<int:pk>/excluir/', views.excluir_permissao, name='excluir_permissao'),
+    path("", views.index, name="index"),
+    path("parametros-gerais/", views.parametros_gerais, name="parametros_gerais"),
+    path("integracoes/", views.lista_integracoes, name="lista_integracoes"),
+    path("integracoes/nova/", views.nova_integracao, name="nova_integracao"),
+    path("modelos-impressao/", views.editar_modelo_impressao, name="modelos_impressao"),
+    path("backup/", views.backup, name="backup"),
+    path("fazer-backup/", views.fazer_backup, name="fazer_backup"),
+    path("restaurar-backup/", views.restaurar_backup, name="restaurar_backup"),
+    path("listar-backups/", views.listar_backups, name="listar_backups"),
+    path("excluir-backup/", views.excluir_backup, name="excluir_backup"),
 ]

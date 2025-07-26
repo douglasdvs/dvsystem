@@ -1,0 +1,38 @@
+--- a/views.py
++++ b/views.py
+@@ def dashboard(request):
+-    pedidos_urgentes = pedidos.filter(status='P').count()
++    pedidos_urgentes = pedidos.filter(prioridade='U').count()
+
+-    total_pedidos = pedidos.count()
+-    valor_total = valores['valor_total'] or 0
+-    valor_medio = valor_total / total_pedidos if total_pedidos > 0 else 0
++    total_pedidos = pedidos.count()
++    valor_total = sum(p.total for p in pedidos)
++    valor_medio = valor_total / total_pedidos if total_pedidos > 0 else 0
+
++    pedidos_em_atraso = pedidos.filter(
++        data_entrega_prevista__lt=hoje,
++        status__in=['P', 'A', 'E']
++    ).count()
+
+@@ def listar(request):
+     pedidos = Pedido.objects.select_related('cliente', 'cupom').prefetch_related('itens')
+
+     # Aplicar filtros
+     if form.is_valid():
+         if form.cleaned_data['status']:
+             pedidos = pedidos.filter(status=form.cleaned_data['status'])
+         if form.cleaned_data['prioridade']:
+             pedidos = pedidos.filter(prioridade=form.cleaned_data['prioridade'])
+         if form.cleaned_data['vendedor']:
+             pedidos = pedidos.filter(vendedor=form.cleaned_data['vendedor'])
+
++        # ✅ Filtros de data sincronizados com dashboard
++        if form.cleaned_data.get('data_inicio'):
++            pedidos = pedidos.filter(data__gte=form.cleaned_data['data_inicio'])
++        if form.cleaned_data.get('data_fim'):
++            pedidos = pedidos.filter(data__lte=form.cleaned_data['data_fim'])
+
+         if form.cleaned_data['busca']:
+             query = form.cleaned_data['busca']

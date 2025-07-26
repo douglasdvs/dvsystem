@@ -1,29 +1,45 @@
 <p>{% load static %}</p>
+{% load logo_extras %}
 <style>
-  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
-  .box { margin: 9px 0; padding: 9px; border: 1px solid #ccc; border-radius: 6px; }
-  .titulo { font-size: 14px; font-weight: bold; margin-bottom: 5px; background-color: #f2f2f2; padding: 5px; }
-  .tabela th, .tabela td { padding: 6px; text-align: center; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #333; margin: 0; padding: 0; }
+  .box { margin: 4px 0; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; }
+  .titulo { font-size: 12px; font-weight: bold; margin-bottom: 2px; background-color: #f2f2f2; padding: 3px 5px; }
+  .tabela th, .tabela td { padding: 3px 4px; text-align: center; font-size: 10px; }
   .tabela th { background-color: #efefef; }
-  .direita { text-align: right; margin-right: 10px; }
-  .destaque { font-weight: bold; font-size: 13px; }
-  .assinatura { margin-top: 60px; text-align: center; }
-  .assinatura div { border-top: 1px solid #999; width: 200px; margin: auto; padding-top: 5px; }
-  .rodape { margin-top: 40px; font-size: 10px; text-align: center; color: #666; }
-  .qr-container { text-align: center; margin-top: 30px; }
-  .qr-container img { width: 150px; height: 150px; }
-  .confirmacao { margin-top: 40px; text-align: center; font-size: 12px; }
+  .direita { text-align: right; margin-right: 6px; }
+  .destaque { font-weight: bold; font-size: 11px; }
+  .assinatura { margin-top: 30px; text-align: center; }
+  .assinatura div { border-top: 1px solid #999; width: 140px; margin: auto; padding-top: 3px; }
+  .rodape { margin-top: 20px; font-size: 9px; text-align: center; color: #666; }
+  .qr-container { text-align: center; margin-top: 15px; }
+  .qr-container img { width: 100px; height: 100px; }
+  .confirmacao { margin-top: 20px; text-align: center; font-size: 11px; }
+  .logo-pedido { max-width: 140px; max-height: 40px; display: block; margin-bottom: 4px; }
+  @media print {
+    body { margin: 0; }
+    .box { page-break-inside: avoid; }
+  }
 </style>
 
 <!-- Logo e dados do vendedor -->
 <table class="box" width="100%">
   <tbody>
     <tr>
-      <td width="40%"><img class="logo" src="{% static 'logo.png' %}" alt="LOGO" width="204" height="73"></td>
+      <td width="40%">
+        {% if configuracao and configuracao.logo %}
+          {% if pdf_export %}
+            <img class="logo-pedido" src="{{ configuracao.logo.path }}" alt="LOGO">
+          {% else %}
+            <img class="logo-pedido" src="{{ configuracao.logo.url }}" alt="LOGO">
+          {% endif %}
+        {% else %}
+          <span style="color:#888;font-size:10px;">Logo não configurado</span>
+        {% endif %}
+      </td>
       <td style="text-align: center;" width="40%">
         <div class="titulo">Pedido n&ordm; {{ pedido.codigo }}</div>
         <div><strong>Vendedor:</strong> {{ pedido.vendedor }}</div>
-        <strong>Previsão de Entrega:</strong> {{ pedido.data_entrega_prevista|date:"d/m/Y" }}<br>
+        <strong>Previsão de Entrega:</strong> {% if pedido.data_entrega_prevista %}{{ pedido.data_entrega_prevista|date:"d/m/Y" }}{% else %}Não informada{% endif %}<br>
         <strong>Modo de Envio:</strong> {{ pedido.get_forma_envio_display }}<br>
       </td>
       <td style="text-align: right;" width="30%">Data: {{ pedido.data|date:"d/m/Y" }}</td>
@@ -34,11 +50,20 @@
 <!-- Dados do cliente -->
 <div class="box">
   <div class="titulo">Dados do Cliente</div>
-  <strong>Nome:</strong> {{ cliente.nome }} ({{ cliente.apelido }})<br>
-  <strong>Endereço:</strong> {{ cliente.endereco }}<br>
-  <strong>Bairro:</strong> {{ cliente.bairro }}<br>
-  <strong>Cidade/UF:</strong> {{ cliente.cidade }} - {{ cliente.uf }}<br>
-  <strong>CEP:</strong> {{ cliente.cep }}<br>
+  <strong>Nome:</strong> {% if cliente.nome_loja %}{{ cliente.nome_loja }} - {% endif %}{{ cliente.nome }}<br>
+  {% with endereco=cliente.enderecos.first %}
+    {% if endereco %}
+      <strong>Endereço:</strong> {{ endereco.logradouro }}, {{ endereco.numero }}{% if endereco.complemento %}, {{ endereco.complemento }}{% endif %}<br>
+      <strong>Bairro:</strong> {{ endereco.bairro }}<br>
+      <strong>Cidade/UF:</strong> {{ endereco.cidade }} - {{ endereco.uf }}<br>
+      <strong>CEP:</strong> {{ endereco.cep }}<br>
+    {% else %}
+      <strong>Endereço:</strong> Não cadastrado<br>
+      <strong>Bairro:</strong> -<br>
+      <strong>Cidade/UF:</strong> -<br>
+      <strong>CEP:</strong> -<br>
+    {% endif %}
+  {% endwith %}
   <strong>Telefone:</strong> {{ cliente.telefone }}
 </div>
 
@@ -49,7 +74,7 @@
     <thead>
       <tr>
         <th>Descrição</th>
-        <th>Unidade</th>
+        <th>Observações</th>
         <th>Preço unitário</th>
         <th>Qtd.</th>
         <th>Subtotal</th>
@@ -59,7 +84,7 @@
       {% for item in pedido.itens.all %}
       <tr>
         <td>{% if item.produto %}{{ item.produto.descricao }}{% else %}Produto não definido{% endif %}</td>
-        <td>{% if item.produto and item.produto.unidade %}{{ item.produto.unidade }}{% else %}-{% endif %}</td>
+        <td>{{ item.observacoes|default:'-' }}</td>
         <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
         <td>{{ item.quantidade }}</td>
         <td>R$ {{ item.subtotal|floatformat:2 }}</td>
@@ -72,7 +97,8 @@
   <strong>Fretes:</strong> R$ {{ pedido.taxa_entrega|floatformat:2 }}<br>
   <strong>Desconto:</strong> R$ {{ pedido.desconto|floatformat:2 }}<br>
   <strong>Total:</strong>   R$ {{ pedido.total|floatformat:2 }}<br>
-</div>
+  <strong>Valor Recebido:</strong> R$ {{ pedido.valor_recebido|default:0|floatformat:2 }}<br>
+  </div>
 
 <!-- Forma de pagamento -->
 <div class="box">
@@ -84,6 +110,21 @@
 <div class="box">
   <div class="titulo">Observação</div>
   <p>{{ pedido.observacoes|default:'-' }}</p>
+</div>
+
+<!-- Aviso fixo ao final do pedido -->
+<div class="box" style="margin-top: 10px; background: #f7f7f7; border: 1px dashed #2193b0; font-size:10px; padding: 6px 8px;">
+  <strong>ATENÇÃO:</strong><br>
+  Por favor verificar se os dados da arte aprovada estão corretos assim que a mesma for enviada.<br>
+  Sinal no mínimo de 70% para iniciar a produção.<br>
+  <br>
+  Prezado(a) Cliente,<br>
+  Informamos que o prazo estimado para a produção do seu pedido é de <b>15 DIAS ÚTEIS</b>, contados a partir da data de confirmação e aprovação dos detalhes da ARTE.<br>
+  Caso ocorra qualquer imprevisto ou necessidade de ajuste que possa impactar esse prazo, entraremos em contato previamente para alinhar as melhores soluções.<br>
+  O serviço de entrega é realizado por meio da empresa dos CORREIOS, sendo assim não temos controle das regiões onde eles classificam como zona de risco e não realizam a entrega a domicílio ou horário das entregas.<br>
+  Caso o pedido enviado para o endereço confirmado pelo contratante do serviço volte para MV PRINT será cobrado o valor do envio novamente, para que isso não ocorra pedimos que acompanhe o seu pedido no site oficial dos CORREIOS junto com seu código de rastreio que é fornecido assim que é postado.<br>
+  Agradecemos pela confiança e parceria!<br>
+  <b>GRATIDÃO POR TER VOCÊ COMO CLIENTE</b>
 </div>
 
 

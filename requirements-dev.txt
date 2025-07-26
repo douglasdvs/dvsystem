@@ -19,3 +19,5 @@ django-extensions>=3.2.3
 # Documentation
 sphinx>=7.2.6
 sphinx-rtd-theme>=2.0.0 
+waitress
+pyinstaller

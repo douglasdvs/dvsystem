@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% block title %}Integrações{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4"><i class="bi bi-plug"></i> Integrações</h1>
+  <div class="mb-3">
+    <a href="/configuracao/integracoes/nova/" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nova Integração</a>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Tipo</th>
+        <th>API Key</th>
+        <th>Ativo</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for integracao in integracoes %}
+      <tr>
+        <td>{{ integracao.nome }}</td>
+        <td>{{ integracao.get_tipo_display }}</td>
+        <td>{{ integracao.api_key|default:'-' }}</td>
+        <td>{% if integracao.ativo %}<span class="badge bg-success">Sim</span>{% else %}<span class="badge bg-danger">Não</span>{% endif %}</td>
+        <td>
+          <a href="/configuracao/integracoes/{{ integracao.id }}/editar/" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Editar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center">Nenhuma integração cadastrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

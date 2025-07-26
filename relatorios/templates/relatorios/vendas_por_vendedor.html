@@ -27,6 +27,8 @@
             <th>Nº Pedidos</th>
             <th>Ticket Médio</th>
             <th>Meta ({{ meta|floatformat:2 }})</th>
+            <th>Comissão (%)</th>
+            <th>Valor Comissão</th>
         </tr>
     </thead>
     <tbody>
@@ -41,9 +43,11 @@
                     {{ d.meta_atingida|floatformat:1 }}%
                 </span>
             </td>
+            <td>{{ d.comissao_percentual|floatformat:2 }}</td>
+            <td>R$ {{ d.valor_comissao|floatformat:2 }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5">Nenhum dado encontrado para o período.</td></tr>
+        <tr><td colspan="7">Nenhum dado encontrado para o período.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -75,4 +79,4 @@ new Chart(ctx, {
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

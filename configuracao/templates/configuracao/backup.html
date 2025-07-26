@@ -1,401 +1,70 @@
-{% extends 'configuracao/base_configuracao.html' %}
-
-{% block card_title %}Configurações de Backup{% endblock %}
-
-{% block card_content %}
-<form method="post">
-    {% csrf_token %}
-    
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Backup Automático</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.backup_automatico }}
-                            <label class="form-check-label" for="{{ form.backup_automatico.id_for_label }}">
-                                Ativar Backup Automático
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.frequencia_backup.id_for_label }}" class="form-label">Frequência</label>
-                        {{ form.frequencia_backup }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.hora_backup.id_for_label }}" class="form-label">Hora</label>
-                        {{ form.hora_backup }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.dias_backup.id_for_label }}" class="form-label">Dias da Semana</label>
-                        {{ form.dias_backup }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.manter_backups.id_for_label }}" class="form-label">Manter Backups</label>
-                        {{ form.manter_backups }}
-                    </div>
-                </div>
-            </div>
+{% extends 'core/base.html' %}
+{% block title %}Backup e Restauração{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4"><i class="bi bi-hdd-network"></i> Backup e Restauração</h1>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-download"></i> Backup Manual</h5>
+          <p class="card-text">Clique no botão abaixo para gerar um backup do banco de dados atual.</p>
+          <form method="post" action="{% url 'configuracao:fazer_backup' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-down"></i> Fazer Backup Agora</button>
+          </form>
         </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Armazenamento</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="{{ form.tipo_armazenamento.id_for_label }}" class="form-label">Tipo de Armazenamento</label>
-                        {{ form.tipo_armazenamento }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.diretorio_backup.id_for_label }}" class="form-label">Diretório Local</label>
-                        {{ form.diretorio_backup }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.servidor_ftp.id_for_label }}" class="form-label">Servidor FTP</label>
-                        {{ form.servidor_ftp }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.porta_ftp.id_for_label }}" class="form-label">Porta FTP</label>
-                        {{ form.porta_ftp }}
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.usar_ssl_ftp }}
-                            <label class="form-check-label" for="{{ form.usar_ssl_ftp.id_for_label }}">
-                                Usar SSL
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.usuario_ftp.id_for_label }}" class="form-label">Usuário FTP</label>
-                        {{ form.usuario_ftp }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.senha_ftp.id_for_label }}" class="form-label">Senha FTP</label>
-                        {{ form.senha_ftp }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.diretorio_ftp.id_for_label }}" class="form-label">Diretório FTP</label>
-                        {{ form.diretorio_ftp }}
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Conteúdo do Backup</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.backup_banco }}
-                            <label class="form-check-label" for="{{ form.backup_banco.id_for_label }}">
-                                Backup do Banco de Dados
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.backup_arquivos }}
-                            <label class="form-check-label" for="{{ form.backup_arquivos.id_for_label }}">
-                                Backup de Arquivos
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.backup_configuracoes }}
-                            <label class="form-check-label" for="{{ form.backup_configuracoes.id_for_label }}">
-                                Backup de Configurações
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            {{ form.backup_logs }}
-                            <label class="form-check-label" for="{{ form.backup_logs.id_for_label }}">
-                                Backup de Logs
-                            </label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.diretorios_excluir.id_for_label }}" class="form-label">Diretórios para Excluir</label>
-                        {{ form.diretorios_excluir }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.arquivos_excluir.id_for_label }}" class="form-label">Arquivos para Excluir</label>
-                        {{ form.arquivos_excluir }}
-                    </div>
-                </div>
-            </div>
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-upload"></i> Restaurar Backup</h5>
+          <p class="card-text">Selecione um arquivo de backup para restaurar o banco de dados.</p>
+          <form method="post" action="{% url 'configuracao:restaurar_backup' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="backup_file" class="form-control mb-2" required>
+            <button type="submit" class="btn btn-warning"><i class="bi bi-cloud-arrow-up"></i> Restaurar Backup</button>
+          </form>
         </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Ações</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-primary" id="btn-backup-agora">
-                            Fazer Backup Agora
-                        </button>
-                        <div id="status-backup" class="mt-3" style="display: none;">
-                            <div class="alert alert-info">
-                                Realizando backup...
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-secondary" id="btn-restaurar-backup">
-                            Restaurar Backup
-                        </button>
-                        <div id="status-restore" class="mt-3" style="display: none;">
-                            <div class="alert alert-info">
-                                Restaurando backup...
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-info" id="btn-listar-backups">
-                            Listar Backups
-                        </button>
-                        <div id="lista-backups" class="mt-3" style="display: none;">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Data</th>
-                                            <th>Tamanho</th>
-                                            <th>Tipo</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    
-    <div class="row mt-4">
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+  </div>
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-archive"></i> Backups Recentes</h5>
+          <button id="btn-listar-backups" class="btn btn-outline-secondary btn-sm mb-2"><i class="bi bi-list"></i> Listar Backups</button>
+          <ul id="lista-backups" class="list-group"></ul>
         </div>
+      </div>
     </div>
-</form>
-
-{% block extra_js %}
+  </div>
+</div>
 <script>
-    $(document).ready(function() {
-        // Inicializar select2 para campos de seleção
-        $('select').select2({
-            theme: 'bootstrap4',
-            width: '100%'
+  document.getElementById('btn-listar-backups').onclick = function() {
+    fetch('{% url 'configuracao:listar_backups' %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}})
+      .then(r => r.text())
+      .then(txt => {
+        let ul = document.getElementById('lista-backups');
+        ul.innerHTML = '';
+        txt.split(',').filter(Boolean).forEach(f => {
+          let li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          li.innerHTML = `<span>${f}</span> <button class='btn btn-danger btn-sm' onclick="excluirBackup('${f}')"><i class='bi bi-trash'></i> Excluir</button>`;
+          ul.appendChild(li);
         });
-        
-        // Inicializar timepicker para campo de hora
-        $('#{{ form.hora_backup.id_for_label }}').timepicker({
-            format: 'HH:mm',
-            showMeridian: false
-        });
-        
-        // Mostrar/ocultar campos de FTP baseado no tipo de armazenamento
-        $('#{{ form.tipo_armazenamento.id_for_label }}').change(function() {
-            var tipoArmazenamento = $(this).val();
-            if (tipoArmazenamento === 'ftp') {
-                $('.campo-ftp').show();
-            } else {
-                $('.campo-ftp').hide();
-            }
-        }).trigger('change');
-        
-        // Fazer backup agora
-        $('#btn-backup-agora').click(function() {
-            $('#status-backup').show();
-            $.ajax({
-                url: '{% url "configuracao:fazer_backup" %}',
-                method: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'tipo_armazenamento': $('#{{ form.tipo_armazenamento.id_for_label }}').val(),
-                    'diretorio_backup': $('#{{ form.diretorio_backup.id_for_label }}').val(),
-                    'servidor_ftp': $('#{{ form.servidor_ftp.id_for_label }}').val(),
-                    'porta_ftp': $('#{{ form.porta_ftp.id_for_label }}').val(),
-                    'usar_ssl_ftp': $('#{{ form.usar_ssl_ftp.id_for_label }}').is(':checked'),
-                    'usuario_ftp': $('#{{ form.usuario_ftp.id_for_label }}').val(),
-                    'senha_ftp': $('#{{ form.senha_ftp.id_for_label }}').val(),
-                    'diretorio_ftp': $('#{{ form.diretorio_ftp.id_for_label }}').val(),
-                    'backup_banco': $('#{{ form.backup_banco.id_for_label }}').is(':checked'),
-                    'backup_arquivos': $('#{{ form.backup_arquivos.id_for_label }}').is(':checked'),
-                    'backup_configuracoes': $('#{{ form.backup_configuracoes.id_for_label }}').is(':checked'),
-                    'backup_logs': $('#{{ form.backup_logs.id_for_label }}').is(':checked'),
-                    'diretorios_excluir': $('#{{ form.diretorios_excluir.id_for_label }}').val(),
-                    'arquivos_excluir': $('#{{ form.arquivos_excluir.id_for_label }}').val()
-                },
-                success: function(response) {
-                    $('#status-backup .alert').removeClass('alert-info').addClass('alert-success')
-                        .html('Backup realizado com sucesso!');
-                },
-                error: function() {
-                    $('#status-backup .alert').removeClass('alert-info').addClass('alert-danger')
-                        .html('Erro ao realizar backup.');
-                }
-            });
-        });
-        
-        // Restaurar backup
-        $('#btn-restaurar-backup').click(function() {
-            $('#status-restore').show();
-            $.ajax({
-                url: '{% url "configuracao:restaurar_backup" %}',
-                method: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'tipo_armazenamento': $('#{{ form.tipo_armazenamento.id_for_label }}').val(),
-                    'diretorio_backup': $('#{{ form.diretorio_backup.id_for_label }}').val(),
-                    'servidor_ftp': $('#{{ form.servidor_ftp.id_for_label }}').val(),
-                    'porta_ftp': $('#{{ form.porta_ftp.id_for_label }}').val(),
-                    'usar_ssl_ftp': $('#{{ form.usar_ssl_ftp.id_for_label }}').is(':checked'),
-                    'usuario_ftp': $('#{{ form.usuario_ftp.id_for_label }}').val(),
-                    'senha_ftp': $('#{{ form.senha_ftp.id_for_label }}').val(),
-                    'diretorio_ftp': $('#{{ form.diretorio_ftp.id_for_label }}').val()
-                },
-                success: function(response) {
-                    $('#status-restore .alert').removeClass('alert-info').addClass('alert-success')
-                        .html('Backup restaurado com sucesso!');
-                },
-                error: function() {
-                    $('#status-restore .alert').removeClass('alert-info').addClass('alert-danger')
-                        .html('Erro ao restaurar backup.');
-                }
-            });
-        });
-        
-        // Listar backups
-        $('#btn-listar-backups').click(function() {
-            $('#lista-backups').show();
-            $.ajax({
-                url: '{% url "configuracao:listar_backups" %}',
-                method: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'tipo_armazenamento': $('#{{ form.tipo_armazenamento.id_for_label }}').val(),
-                    'diretorio_backup': $('#{{ form.diretorio_backup.id_for_label }}').val(),
-                    'servidor_ftp': $('#{{ form.servidor_ftp.id_for_label }}').val(),
-                    'porta_ftp': $('#{{ form.porta_ftp.id_for_label }}').val(),
-                    'usar_ssl_ftp': $('#{{ form.usar_ssl_ftp.id_for_label }}').is(':checked'),
-                    'usuario_ftp': $('#{{ form.usuario_ftp.id_for_label }}').val(),
-                    'senha_ftp': $('#{{ form.senha_ftp.id_for_label }}').val(),
-                    'diretorio_ftp': $('#{{ form.diretorio_ftp.id_for_label }}').val()
-                },
-                success: function(response) {
-                    var tbody = $('#lista-backups tbody');
-                    tbody.empty();
-                    
-                    response.backups.forEach(function(backup) {
-                        var tr = $('<tr>');
-                        tr.append($('<td>').text(backup.data));
-                        tr.append($('<td>').text(backup.tamanho));
-                        tr.append($('<td>').text(backup.tipo));
-                        
-                        var tdAcoes = $('<td>');
-                        var btnRestaurar = $('<button>')
-                            .addClass('btn btn-sm btn-primary')
-                            .text('Restaurar')
-                            .click(function() {
-                                restaurarBackup(backup.id);
-                            });
-                        var btnExcluir = $('<button>')
-                            .addClass('btn btn-sm btn-danger')
-                            .text('Excluir')
-                            .click(function() {
-                                excluirBackup(backup.id);
-                            });
-                        
-                        tdAcoes.append(btnRestaurar).append(' ').append(btnExcluir);
-                        tr.append(tdAcoes);
-                        
-                        tbody.append(tr);
-                    });
-                },
-                error: function() {
-                    $('#lista-backups .alert').removeClass('alert-info').addClass('alert-danger')
-                        .html('Erro ao listar backups.');
-                }
-            });
-        });
-        
-        // Função para restaurar backup específico
-        function restaurarBackup(id) {
-            $('#status-restore').show();
-            $.ajax({
-                url: '{% url "configuracao:restaurar_backup" %}',
-                method: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'id': id,
-                    'tipo_armazenamento': $('#{{ form.tipo_armazenamento.id_for_label }}').val(),
-                    'diretorio_backup': $('#{{ form.diretorio_backup.id_for_label }}').val(),
-                    'servidor_ftp': $('#{{ form.servidor_ftp.id_for_label }}').val(),
-                    'porta_ftp': $('#{{ form.porta_ftp.id_for_label }}').val(),
-                    'usar_ssl_ftp': $('#{{ form.usar_ssl_ftp.id_for_label }}').is(':checked'),
-                    'usuario_ftp': $('#{{ form.usuario_ftp.id_for_label }}').val(),
-                    'senha_ftp': $('#{{ form.senha_ftp.id_for_label }}').val(),
-                    'diretorio_ftp': $('#{{ form.diretorio_ftp.id_for_label }}').val()
-                },
-                success: function(response) {
-                    $('#status-restore .alert').removeClass('alert-info').addClass('alert-success')
-                        .html('Backup restaurado com sucesso!');
-                },
-                error: function() {
-                    $('#status-restore .alert').removeClass('alert-info').addClass('alert-danger')
-                        .html('Erro ao restaurar backup.');
-                }
-            });
-        }
-        
-        // Função para excluir backup específico
-        function excluirBackup(id) {
-            if (confirm('Tem certeza que deseja excluir este backup?')) {
-                $.ajax({
-                    url: '{% url "configuracao:excluir_backup" %}',
-                    method: 'POST',
-                    data: {
-                        'csrfmiddlewaretoken': '{{ csrf_token }}',
-                        'id': id,
-                        'tipo_armazenamento': $('#{{ form.tipo_armazenamento.id_for_label }}').val(),
-                        'diretorio_backup': $('#{{ form.diretorio_backup.id_for_label }}').val(),
-                        'servidor_ftp': $('#{{ form.servidor_ftp.id_for_label }}').val(),
-                        'porta_ftp': $('#{{ form.porta_ftp.id_for_label }}').val(),
-                        'usar_ssl_ftp': $('#{{ form.usar_ssl_ftp.id_for_label }}').is(':checked'),
-                        'usuario_ftp': $('#{{ form.usuario_ftp.id_for_label }}').val(),
-                        'senha_ftp': $('#{{ form.senha_ftp.id_for_label }}').val(),
-                        'diretorio_ftp': $('#{{ form.diretorio_ftp.id_for_label }}').val()
-                    },
-                    success: function(response) {
-                        $('#btn-listar-backups').click();
-                    },
-                    error: function() {
-                        alert('Erro ao excluir backup.');
-                    }
-                });
-            }
-        }
-    });
+      });
+  };
+  function excluirBackup(id) {
+    if(confirm('Tem certeza que deseja excluir este backup?')) {
+      fetch('{% url 'configuracao:excluir_backup' %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'filename=' + encodeURIComponent(id)
+      }).then(() => document.getElementById('btn-listar-backups').click());
+    }
+  }
 </script>
 {% endblock %}
-{% endblock %} 

@@ -1,5 +1,3 @@
-alert('JS do pedido carregado!');
-
 // Função para calcular total
 function calcularTotal() {
     var total = 0;
@@ -20,109 +18,163 @@ function calcularTotal() {
 }
 
 $(document).ready(function() {
-    // Inicializar Select2 para cliente
-    $('#id_cliente').select2({
+    // Inicialização do Select2 para todos os selects
+    $('.produto-select').select2({
         theme: 'bootstrap-5',
         width: '100%',
+        placeholder: 'Digite o nome ou código do produto',
+        allowClear: true,
         language: {
-            inputTooShort: function() {
-                return 'Digite pelo menos 2 caracteres...';
+            noResults: function() {
+                return "Nenhum produto encontrado";
             },
             searching: function() {
-                return 'Buscando...';
-            },
-            noResults: function() {
-                return 'Nenhum resultado encontrado';
+                return "Buscando...";
             }
         }
     });
 
-    // Função para inicializar Select2 e preencher preço
-    function inicializarSelect2Produto(container) {
-        container.find('.produto-select').select2({
-            theme: 'bootstrap-5',
-            placeholder: 'Busque por nome, código ou EAN do produto',
-            minimumInputLength: 2,
-            ajax: {
-                url: '/produtos/api/buscar/',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { term: params.term };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                }
-            },
-            templateResult: function(produto) {
-                if (!produto.id) return produto.text;
-                let preco = produto.preco ? `<span style='color:#388e3c;font-weight:bold;margin-left:8px;'>R$ ${produto.preco}</span>` : '';
-                let estoque = produto.estoque ? `<span style='color:#888;margin-left:8px;'>Estoque: ${produto.estoque}</span>` : '';
-                return $(`<span><i class='fas fa-box' style='margin-right:6px;color:#1976d2;'></i>${produto.text} ${preco} ${estoque}</span>`);
-            },
-            templateSelection: function(produto) {
-                return produto.text || produto.id;
-            },
-            width: 'resolve'
-        }).on('select2:select', function(e) {
-            var data = e.params.data;
-            var itemForm = $(this).closest('.item-form');
-            if (data.preco && itemForm.length) {
-                itemForm.find('input[name$="preco_unitario"]').val(data.preco);
-            }
+    // Função para formatar valores monetários
+    function formatMoney(value) {
+        return parseFloat(value).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
     }
 
-    // Inicializa Select2 para os itens já existentes
-    $('#formset-container .item-form').each(function() {
-        inicializarSelect2Produto($(this));
-    });
-
-    // Função para calcular subtotal
+    // Função para calcular o subtotal de um item
     function calcularSubtotal(itemForm) {
-        var quantidade = parseFloat(itemForm.find('input[name$="quantidade"]').val()) || 0;
-        var preco = parseFloat(itemForm.find('input[name$="preco_unitario"]').val()) || 0;
-        var desconto = parseFloat(itemForm.find('input[name$="desconto_item"]').val()) || 0;
-        var subtotal = quantidade * preco;
-        if (desconto > 0) {
-            subtotal = subtotal - (subtotal * (desconto / 100));
+        const quantidade = parseFloat(itemForm.find('[name$="-quantidade"]').val()) || 0;
+        const precoUnitario = parseFloat(itemForm.find('[name$="-preco_unitario"]').val()) || 0;
+        const descontoItem = parseFloat(itemForm.find('[name$="-desconto_item"]').val()) || 0;
+        
+        let subtotal = quantidade * precoUnitario;
+        if (descontoItem > 0) {
+            subtotal = subtotal * (1 - (descontoItem / 100));
         }
-        itemForm.find('.subtotal-display').val(subtotal.toFixed(2));
-        calcularTotal();
+        
+        itemForm.find('.subtotal-display').val(formatMoney(subtotal));
+        return subtotal;
     }
 
-    // Eventos para calcular subtotal
-    $(document).on('change', 'input[name$="quantidade"], input[name$="preco_unitario"], input[name$="desconto_item"]', function() {
-        var itemForm = $(this).closest('.item-form');
-        calcularSubtotal(itemForm);
-    });
+    // Função para calcular o total do pedido
+    function calcularTotalPedido() {
+        let total = 0;
+        $('.item-form').each(function() {
+            total += calcularSubtotal($(this));
+        });
 
-    // Calcular total quando mudar desconto ou taxa
-    $('#id_desconto, #id_taxa_entrega').on('change', calcularTotal);
+        const desconto = parseFloat($('#id_desconto').val()) || 0;
+        const taxaEntrega = parseFloat($('#id_taxa_entrega').val()) || 0;
+
+        if (desconto > 0) {
+            total = total * (1 - (desconto / 100));
+        }
+
+        total += taxaEntrega;
+        $('#total_pedido').text(formatMoney(total));
+    }
 
     // Adicionar novo item
-    $('#add-item').on('click', function(e) {
-        e.preventDefault();
-        var emptyForm = $('#empty-form .item-form').clone(true);
-        var totalForms = $('#id_' + $('#formset-container').attr('id').replace('-', '_') + '-TOTAL_FORMS');
-        var formCount = parseInt(totalForms.val());
-        emptyForm.find(':input').each(function() {
-            var name = $(this).attr('name').replace('__prefix__', formCount);
-            var id = $(this).attr('id').replace('__prefix__', formCount);
-            $(this).attr({'name': name, 'id': id});
-        });
+    $('#add-item').click(function() {
+        const totalForms = $('#id_itens-TOTAL_FORMS');
+        const formCount = parseInt(totalForms.val());
+        const emptyForm = $('#empty-form').html().replace(/__prefix__/g, formCount);
+        
         $('#formset-container').append(emptyForm);
         totalForms.val(formCount + 1);
-        inicializarSelect2Produto(emptyForm);
+
+        // Inicializar Select2 no novo item
+        const newForm = $('.item-form').last();
+        newForm.find('.produto-select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Digite o nome ou código do produto',
+            allowClear: true
+        });
+
+        // Adicionar animação
+        newForm.hide().fadeIn(300);
     });
 
     // Remover item
-    $(document).on('click', '.remove-item', function(e) {
-        e.preventDefault();
-        var itemForm = $(this).closest('.item-form');
-        itemForm.remove();
-        calcularTotal();
+    $(document).on('click', '.remove-item', function() {
+        const itemForm = $(this).closest('.item-form');
+        itemForm.fadeOut(300, function() {
+            $(this).remove();
+            calcularTotalPedido();
+        });
     });
+
+    // Atualizar preço unitário ao selecionar produto
+    $(document).on('change', '.produto-select', function() {
+        const itemForm = $(this).closest('.item-form');
+        const produtoId = $(this).val();
+        
+        if (produtoId) {
+            $.get('/pedidos/ajax/preco-produto/', { produto_id: produtoId }, function(data) {
+                if (data.preco !== undefined) {
+                    itemForm.find('[name$="-preco_unitario"]').val(data.preco);
+                    calcularSubtotal(itemForm);
+                    calcularTotalPedido();
+                } else {
+                    alert('Preço do produto não encontrado.');
+                }
+            }).fail(function(xhr) {
+                alert('Erro ao buscar o preço do produto.');
+            });
+        }
+    });
+
+    // Recalcular ao mudar quantidade, preço ou desconto
+    $(document).on('input', '[name$="-quantidade"], [name$="-preco_unitario"], [name$="-desconto_item"]', function() {
+        const itemForm = $(this).closest('.item-form');
+        calcularSubtotal(itemForm);
+        calcularTotalPedido();
+    });
+
+    // Recalcular ao mudar desconto geral ou taxa de entrega
+    $('#id_desconto, #id_taxa_entrega').on('input', function() {
+        calcularTotalPedido();
+    });
+
+    // Validação do formulário
+    $('#pedido-form').on('submit', function(e) {
+        let isValid = true;
+        
+        // Validar campos obrigatórios
+        $(this).find('[required]').each(function() {
+            if (!$(this).val()) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Validar se há pelo menos um item
+        if ($('.item-form').length === 0) {
+            alert('Adicione pelo menos um item ao pedido');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios');
+        }
+    });
+
+    // Feedback visual para campos obrigatórios
+    $('input, select').on('input change', function() {
+        if ($(this).prop('required')) {
+            if ($(this).val()) {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $(this).removeClass('is-valid').addClass('is-invalid');
+            }
+        }
+    });
+
+    // Inicializar cálculos
+    calcularTotalPedido();
 }); 

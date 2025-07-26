@@ -1,9 +1,12 @@
-import pytest
 from decimal import Decimal
+
+import pytest
 from django.core.exceptions import ValidationError
-from clientes.models import Cliente, TipoCliente, Endereco
+
+from clientes.models import Cliente, Endereco, TipoCliente
 
 pytestmark = pytest.mark.django_db
+
 
 class TestTipoCliente:
     def test_criar_tipo_cliente(self, tipo_cliente):
@@ -20,22 +23,15 @@ class TestTipoCliente:
     def test_desconto_negativo(self):
         """Testa validação de desconto negativo"""
         with pytest.raises(ValidationError):
-            tipo = TipoCliente(
-                nome="Tipo Teste",
-                descricao="Descrição teste",
-                desconto_padrao=Decimal('-10.00')
-            )
+            tipo = TipoCliente(nome="Tipo Teste", descricao="Descrição teste", desconto_padrao=Decimal("-10.00"))
             tipo.full_clean()
 
     def test_desconto_maior_100(self):
         """Testa validação de desconto maior que 100%"""
         with pytest.raises(ValidationError):
-            tipo = TipoCliente(
-                nome="Tipo Teste",
-                descricao="Descrição teste",
-                desconto_padrao=Decimal('150.00')
-            )
+            tipo = TipoCliente(nome="Tipo Teste", descricao="Descrição teste", desconto_padrao=Decimal("150.00"))
             tipo.full_clean()
+
 
 class TestEndereco:
     def test_criar_endereco(self, endereco):
@@ -59,14 +55,10 @@ class TestEndereco:
         """Testa validação de CEP inválido"""
         with pytest.raises(ValidationError):
             endereco = Endereco(
-                cep="123",
-                logradouro="Rua Teste",
-                numero="123",
-                bairro="Centro",
-                cidade="São Paulo",
-                uf="SP"
+                cep="123", logradouro="Rua Teste", numero="123", bairro="Centro", cidade="São Paulo", uf="SP"
             )
             endereco.full_clean()
+
 
 class TestCliente:
     def test_criar_cliente(self, cliente):
@@ -92,7 +84,7 @@ class TestCliente:
                 email="teste@teste.com",
                 telefone="(11) 1234-5678",
                 cpf_cnpj="123",  # CPF inválido
-                tipo_cliente=tipo_cliente
+                tipo_cliente=tipo_cliente,
             )
             cliente.full_clean()
 
@@ -104,7 +96,7 @@ class TestCliente:
                 email="email_invalido",
                 telefone="(11) 1234-5678",
                 cpf_cnpj="12345678901",
-                tipo_cliente=tipo_cliente
+                tipo_cliente=tipo_cliente,
             )
             cliente.full_clean()
 
@@ -116,7 +108,7 @@ class TestCliente:
                 email="teste@teste.com",
                 telefone="123",  # Telefone inválido
                 cpf_cnpj="12345678901",
-                tipo_cliente=tipo_cliente
+                tipo_cliente=tipo_cliente,
             )
             cliente.full_clean()
 
@@ -127,7 +119,7 @@ class TestCliente:
             email="teste@teste.com",
             telefone="(11) 1234-5678",
             cpf_cnpj="12345678901",
-            tipo_cliente=tipo_cliente
+            tipo_cliente=tipo_cliente,
         )
         assert cliente.enderecos.count() == 0
 
@@ -135,4 +127,4 @@ class TestCliente:
         """Testa cliente com múltiplos endereços"""
         novo_endereco = EnderecoFactory()
         cliente.enderecos.add(novo_endereco)
-        assert cliente.enderecos.count() == 2 
+        assert cliente.enderecos.count() == 2

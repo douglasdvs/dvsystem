@@ -14,14 +14,14 @@
         {% csrf_token %}
         <div class="mb-3">
           <label for="id_username" class="form-label">Usuário</label>
-          <input type="text" name="username" id="id_username" class="form-control" placeholder="Digite seu usuário" required autofocus>
+          <input type="text" name="username" id="id_username" class="form-control" placeholder="Digite seu usuário" maxlength="10" required autofocus>
         </div>
         <div class="mb-3">
           <label for="id_password" class="form-label">Senha</label>
-          <input type="password" name="password" id="id_password" class="form-control" placeholder="Digite sua senha" required>
+          <input type="password" name="password" id="id_password" class="form-control" placeholder="Digite sua senha" maxlength="8" required>
         </div>
         <div class="d-flex justify-content-between">
-          <a href="{% url 'core:index' %}" class="btn btn-outline-light">Cancelar</a>
+          <a href="{% url 'core:index' %}" class="btn btn-danger">Cancelar</a>
           <button type="submit" class="btn f1-btn">Entrar</button>
         </div>
       </form>

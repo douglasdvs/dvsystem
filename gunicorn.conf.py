@@ -67,18 +67,22 @@ errorlog = "logs/gunicorn-error.log"
 loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
+
 def on_starting(server):
     """Função executada quando o servidor inicia."""
     pass
+
 
 def on_exit(server):
     """Função executada quando o servidor é encerrado."""
     pass
 
+
 def worker_int(worker):
     """Função executada quando um worker é interrompido."""
     worker.log.info("worker received INT or QUIT signal")
 
+
 def worker_abort(worker):
     """Função executada quando um worker é abortado."""
-    worker.log.info("worker received SIGABRT signal") 
+    worker.log.info("worker received SIGABRT signal")

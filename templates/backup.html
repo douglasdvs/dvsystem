@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Backup e Restauração{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2>Backup e Restauração</h2>
+    <div class="alert alert-info">Clique no botão abaixo para realizar o backup manual do banco de dados.</div>
+    <form method="post" action="">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Fazer Backup Agora</button>
+    </form>
+    {% if backup_url %}
+        <div class="alert alert-success mt-3">
+            Backup gerado com sucesso! <a href="{{ backup_url }}" class="btn btn-success">Baixar Backup</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

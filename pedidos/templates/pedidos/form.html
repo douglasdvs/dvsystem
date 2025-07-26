@@ -62,14 +62,18 @@
       placeholder: 'Selecione um produto',
       allowClear: true
     });
+
+    // Flatpickr aplicado normalmente, sem minDate
     flatpickr('#id_data_entrega_prevista', {
       dateFormat: 'Y-m-d',
       locale: 'pt',
       disable: [function(date) {
         return (date.getDay() === 0 || date.getDay() === 6);
       }],
-      minDate: 'today'
+      allowInput: true,
+      minDate: null // permite qualquer data já gravada
     });
+
     $('#delivery-days').on('input', function() {
       let days = parseInt($(this).val());
       if (isNaN(days) || days < 1) return;
@@ -81,7 +85,7 @@
           added++;
         }
       }
-      $('#id_data_entrega_prevista').val(flatpickr.formatDate(date, 'd/m/Y'));
+      $('#id_data_entrega_prevista').val(flatpickr.formatDate(date, 'Y-m-d'));
     });
     function calcularSubtotal(linha) {
       const quantidade = parseFloat(linha.find('input[name$="-quantidade"]').val()) || 0;
@@ -215,6 +219,22 @@
     $('#id_valor_recebido').on('input', atualizarValorRestante);
     // Atualiza ao carregar a página
     atualizarValorRestante();
+
+    // Impede submit do formulário ao pressionar Enter, exceto em textarea e botão submit
+    $('#pedido-form').on('keydown', function(e) {
+      if (e.key === 'Enter') {
+        var tag = e.target.tagName.toLowerCase();
+        if (tag !== 'textarea' && tag !== 'button' && !$(e.target).is('input[type=submit]')) {
+          e.preventDefault();
+          // Move para o próximo campo
+          var $fields = $(this).find('input, select, textarea').filter(':visible:enabled');
+          var index = $fields.index(e.target);
+          if (index > -1 && index < $fields.length - 1) {
+            $fields.eq(index + 1).focus();
+          }
+        }
+      }
+    });
   });
 </script>
 {% endblock %}

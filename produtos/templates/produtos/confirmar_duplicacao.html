@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% block title %}Duplicar Produto{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-files"></i> Duplicar Produto</h4>
+                </div>
+                <div class="card-body">
+                    <p>Deseja realmente duplicar o produto <strong>{{ produto.descricao }}</strong>?</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'produtos:detalhe' produto.id %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-warning"><i class="bi bi-files"></i> Duplicar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

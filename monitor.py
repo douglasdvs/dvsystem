@@ -1,33 +1,32 @@
+import logging
 import os
 import sys
-import psutil
-import requests
-import logging
 from datetime import datetime
 from pathlib import Path
+
 import django
+import psutil
+import requests
 from django.conf import settings
 
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('monitor.log'),
-        logging.StreamHandler()
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("monitor.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
 # Configurar o ambiente Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dvsystem.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dvsystem.settings")
 django.setup()
+
 
 def check_disk_usage():
     """Verifica o uso do disco."""
     try:
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
         usage_percent = disk.percent
         if usage_percent > 90:
             logger.warning(f"Uso do disco crítico: {usage_percent}%")
@@ -35,6 +34,7 @@ def check_disk_usage():
     except Exception as e:
         logger.error(f"Erro ao verificar uso do disco: {e}")
         return None
+
 
 def check_memory_usage():
     """Verifica o uso de memória."""
@@ -48,6 +48,7 @@ def check_memory_usage():
         logger.error(f"Erro ao verificar uso de memória: {e}")
         return None
 
+
 def check_cpu_usage():
     """Verifica o uso da CPU."""
     try:
@@ -59,10 +60,12 @@ def check_cpu_usage():
         logger.error(f"Erro ao verificar uso da CPU: {e}")
         return None
 
+
 def check_database_connection():
     """Verifica a conexão com o banco de dados."""
     try:
         from django.db import connection
+
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
             return True
@@ -70,10 +73,12 @@ def check_database_connection():
         logger.error(f"Erro na conexão com o banco de dados: {e}")
         return False
 
+
 def check_redis_connection():
     """Verifica a conexão com o Redis."""
     try:
         import redis
+
         r = redis.from_url(settings.CELERY_BROKER_URL)
         r.ping()
         return True
@@ -81,10 +86,12 @@ def check_redis_connection():
         logger.error(f"Erro na conexão com o Redis: {e}")
         return False
 
+
 def check_celery_workers():
     """Verifica o status dos workers do Celery."""
     try:
         from celery.app.control import Control
+
         app = Control()
         active_workers = app.inspect().active()
         if not active_workers:
@@ -94,16 +101,18 @@ def check_celery_workers():
         logger.error(f"Erro ao verificar workers do Celery: {e}")
         return False
 
+
 def check_application_health():
     """Verifica a saúde geral da aplicação."""
     try:
-        response = requests.get('http://localhost:8000/health/')
+        response = requests.get("http://localhost:8000/health/")
         return response.status_code == 200
     except Exception as e:
         logger.error(f"Erro ao verificar saúde da aplicação: {e}")
         return False
 
-def send_alert(message, level='warning'):
+
+def send_alert(message, level="warning"):
     """Envia alerta para o sistema de monitoramento."""
     try:
         # Aqui você pode implementar o envio de alertas para seu sistema preferido
@@ -111,6 +120,7 @@ def send_alert(message, level='warning'):
         logger.warning(f"ALERTA: {message}")
     except Exception as e:
         logger.error(f"Erro ao enviar alerta: {e}")
+
 
 def main():
     """Função principal de monitoramento."""
@@ -129,14 +139,14 @@ def main():
 
     # Gerar relatório
     report = {
-        'timestamp': datetime.now().isoformat(),
-        'disk_usage': disk_usage,
-        'memory_usage': memory_usage,
-        'cpu_usage': cpu_usage,
-        'database_ok': db_ok,
-        'redis_ok': redis_ok,
-        'celery_ok': celery_ok,
-        'application_ok': app_ok
+        "timestamp": datetime.now().isoformat(),
+        "disk_usage": disk_usage,
+        "memory_usage": memory_usage,
+        "cpu_usage": cpu_usage,
+        "database_ok": db_ok,
+        "redis_ok": redis_ok,
+        "celery_ok": celery_ok,
+        "application_ok": app_ok,
     }
 
     # Enviar alertas se necessário
@@ -145,5 +155,6 @@ def main():
 
     logger.info(f"Relatório de monitoramento: {report}")
 
-if __name__ == '__main__':
-    main() 
+
+if __name__ == "__main__":
+    main()

@@ -83,7 +83,7 @@
   <div class="row text-center mb-4">
     <div class="col-md-4">
       <div class="f1-summary-card">
-        <div class="f1-summary-title">💰 Receita Total</div>
+        <div class="f1-summary-title">💰 Total em Vendas</div>
         <div class="fs-4">R$ {{ total_receitas|floatformat:2 }}</div>
       </div>
     </div>
@@ -125,6 +125,14 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="inativos-tab" data-bs-toggle="tab" data-bs-target="#inativos" type="button" role="tab" aria-controls="inativos" aria-selected="false">⚠️ Inativos (+35 dias)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="recompra-tab" data-bs-toggle="tab" data-bs-target="#recompra" type="button" role="tab" aria-controls="recompra" aria-selected="false">
+            🛍️ Alerta Recompra
+            {% if clientes_recompra_sacola %}
+              <span class="badge bg-danger ms-1">{{ clientes_recompra_sacola|length }}</span>
+            {% endif %}
+          </button>
         </li>
       </ul>
     </div>
@@ -232,6 +240,42 @@
             </table>
           </div>
         </div>
+
+        <!-- Tab: Alerta de Recompra -->
+        <div class="tab-pane fade" id="recompra" role="tabpanel" aria-labelledby="recompra-tab">
+          <h6 class="text-light mb-3">Clientes com Último Pedido de Sacola entre 25-30 dias</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th>Último Pedido</th>
+                  <th>Dias Desde Pedido</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cliente in clientes_recompra_sacola %}
+                <tr>
+                  <td><a href="{% url 'clientes:editar' cliente.id %}" class="text-decoration-none text-info">{{ cliente.nome }}</a></td>
+                  <td>{{ cliente.telefone }}</td>
+                  <td>{{ cliente.ultimo_pedido|date:"d/m/Y" }}</td>
+                  <td class="warning-days">{{ cliente.dias_desde_pedido }}</td>
+                  <td>
+                    <a href="{% url 'pedidos:novo' %}?cliente_id={{ cliente.id }}" class="btn btn-sm btn-outline-info">Novo Pedido</a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">Nenhum cliente no período de alerta de recompra.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

@@ -30,6 +30,7 @@
                         <th>Descrição</th>
                         <th>Status</th>
                         <th>Criado em</th>
+                        <th>Despesas</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -49,16 +50,22 @@
                         </td>
                         <td>{{ centro.criado_em|date:"d/m/Y" }}</td>
                         <td>
+                            {{ centro.despesas.count }}
+                        </td>
+                        <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{% url 'financeiro:editar_centro_custo' centro.pk %}" class="btn btn-outline-primary">
                                     <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'financeiro:excluir_centro_custo' centro.pk %}" class="btn btn-outline-danger" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este centro de custo?');">
+                                    <i class="fas fa-trash"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             <i class="fas fa-building fa-2x mb-2"></i><br>
                             Nenhum centro de custo cadastrado
                         </td>

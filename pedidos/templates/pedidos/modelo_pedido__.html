@@ -20,8 +20,8 @@
       <h2 style="background: #00556d; color: #fff; padding: 8px 16px; border-radius: 4px;">Pedido {{ pedido.codigo }}</h2>
       <div style="padding: 12px; border: 1px solid #ccc; border-radius: 6px;">
         <p><strong>Cliente:</strong> {{ pedido.cliente.nome }}</p>
-        <p>{{ pedido.cliente.endereco }}</p>
-        <p>{{ pedido.cliente.cidade }} - {{ pedido.cliente.estado }} | CEP {{ pedido.cliente.cep }}</p>
+        <p>{{ pedido.cliente.endereco }}{% if pedido.cliente.numero %}, {{ pedido.cliente.numero }}{% endif %}{% if pedido.cliente.complemento %} - {{ pedido.cliente.complemento }}{% endif %}</p>
+        <p>{{ pedido.cliente.cidade }} - {{ pedido.cliente.uf }} | CEP {{ pedido.cliente.cep }}</p>
         <p>📱 {{ pedido.cliente.telefone }}</p>
       </div>
     </section>

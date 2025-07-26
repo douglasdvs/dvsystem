@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% block content %}
 <h1>Relatório de DRE com Gráficos</h1>
+<p class="text-muted">Período: <strong>{{ inicio|default:'...' }} a {{ fim|default:'...' }}</strong></p>
 <form method="get" class="mb-4">
     <div class="row g-2 align-items-end">
         <div class="col-auto">
@@ -41,34 +42,85 @@
 </form>
 <div class="row mb-4">
     <div class="col-md-6">
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered table-striped align-middle">
             <tbody>
-                <tr><th>Receita Bruta</th><td>R$ {{ dados.receita_bruta|floatformat:2 }}</td></tr>
-                <tr><th>Custos</th><td>R$ {{ dados.custos|floatformat:2 }}</td></tr>
-                <tr><th>Despesas</th><td>R$ {{ dados.despesas|floatformat:2 }}</td></tr>
-                <tr class="table-info"><th>Lucro Operacional</th><td>R$ {{ dados.lucro_operacional|floatformat:2 }}</td></tr>
-                <tr class="table-success"><th>Lucro Líquido</th><td>R$ {{ dados.lucro_liquido|floatformat:2 }}</td></tr>
+                <tr>
+                    <th>
+                        Receita Bruta
+                        <span data-bs-toggle="tooltip" title="Total de vendas no período."><i class="fas fa-info-circle"></i></span>
+                    </th>
+                    <td>R$ {{ dados.receita_bruta|floatformat:2 }}</td>
+                    <td class="text-secondary small">100%</td>
+                </tr>
+                <tr>
+                    <th>
+                        Custos
+                        <span data-bs-toggle="tooltip" title="Custos diretos dos produtos/serviços."><i class="fas fa-info-circle"></i></span>
+                    </th>
+                    <td class="text-danger">R$ {{ dados.custos|floatformat:2 }}</td>
+                    <td class="text-danger small">{{ dados.pct_custos|floatformat:2 }}%</td>
+                </tr>
+                <tr>
+                    <th>
+                        Despesas
+                        <span data-bs-toggle="tooltip" title="Despesas operacionais e administrativas."><i class="fas fa-info-circle"></i></span>
+                    </th>
+                    <td class="text-danger">R$ {{ dados.despesas|floatformat:2 }}</td>
+                    <td class="text-danger small">{{ dados.pct_despesas|floatformat:2 }}%</td>
+                </tr>
+                <tr class="table-info">
+                    <th>
+                        Lucro Operacional
+                        <span data-bs-toggle="tooltip" title="Receita menos custos e despesas."><i class="fas fa-info-circle"></i></span>
+                    </th>
+                    <td>R$ {{ dados.lucro_operacional|floatformat:2 }}</td>
+                    <td class="text-primary small">{{ dados.pct_lucro_operacional|floatformat:2 }}%</td>
+                </tr>
+                <tr class="table-success">
+                    <th>
+                        Lucro Líquido
+                        <span data-bs-toggle="tooltip" title="Lucro final do período."><i class="fas fa-info-circle"></i></span>
+                    </th>
+                    <td>R$ {{ dados.lucro_liquido|floatformat:2 }}</td>
+                    <td class="text-success small">{{ dados.pct_lucro_liquido|floatformat:2 }}%</td>
+                </tr>
             </tbody>
         </table>
     </div>
     <div class="col-md-6">
         <canvas id="graficoDRE" height="200"></canvas>
+        <canvas id="graficoDREBarra" height="200" class="mt-4"></canvas>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// Ativar tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+});
+
 const ctx = document.getElementById('graficoDRE').getContext('2d');
 new Chart(ctx, {
     type: 'pie',
     data: {
-        labels: ['Custos', 'Despesas', 'Lucro Líquido'],
+        labels: ['Receita Bruta', 'Custos', 'Despesas', 'Lucro Operacional', 'Lucro Líquido'],
         datasets: [{
             data: [
+                {{ dados.receita_bruta|floatformat:2 }},
                 {{ dados.custos|floatformat:2 }},
                 {{ dados.despesas|floatformat:2 }},
+                {{ dados.lucro_operacional|floatformat:2 }},
                 {{ dados.lucro_liquido|floatformat:2 }}
             ],
-            backgroundColor: ['#fbc02d', '#1976d2', '#388e3c']
+            backgroundColor: [
+                '#1976d2', // Receita Bruta (azul)
+                '#fbc02d', // Custos (amarelo)
+                '#e53935', // Despesas (vermelho)
+                '#388e3c', // Lucro Operacional (verde)
+                '#8e24aa'  // Lucro Líquido (roxo)
+            ]
         }]
     },
     options: {
@@ -78,5 +130,47 @@ new Chart(ctx, {
         }
     }
 });
+
+// Gráfico de barras de evolução mensal (exemplo com dados fictícios)
+const ctxBar = document.getElementById('graficoDREBarra').getContext('2d');
+new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+        labels: {{ meses|default:"['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']"|safe }},
+        datasets: [
+            {
+                label: 'Receita Bruta',
+                data: {{ receita_mensal|default:"[0,0,0,0,0,0,0,0,0,0,0,0]"|safe }},
+                backgroundColor: '#388e3c'
+            },
+            {
+                label: 'Custos',
+                data: {{ custos_mensal|default:"[0,0,0,0,0,0,0,0,0,0,0,0]"|safe }},
+                backgroundColor: '#fbc02d'
+            },
+            {
+                label: 'Despesas',
+                data: {{ despesas_mensal|default:"[0,0,0,0,0,0,0,0,0,0,0,0]"|safe }},
+                backgroundColor: '#1976d2'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2}) } }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
 </script>
-{% endblock %} 
+<style>
+@media (max-width: 768px) {
+    .table { font-size: 0.95em; }
+    .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+}
+</style>
+{% endblock %}

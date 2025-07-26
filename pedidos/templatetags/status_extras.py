@@ -1,7 +1,9 @@
 from django import template
+
 from pedidos.models import Pedido
 
 register = template.Library()
+
 
 @register.filter
 def status_label(code):

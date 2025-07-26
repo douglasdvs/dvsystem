@@ -3,6 +3,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ERP{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,6 +13,8 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 50%, #a8e063 100%);
             background-attachment: fixed;
+            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
         }
         .sidebar {
             min-height: 100vh;
@@ -50,6 +53,8 @@
             box-shadow: 0 4px 24px rgba(33,147,176,0.10);
             margin-top: 2rem;
             animation: fadeIn 0.7s;
+            text-align: match-parent;
+            text-align: -webkit-match-parent;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(30px); }
@@ -76,6 +81,10 @@
             .sidebar { min-height: auto; }
             .content { margin-top: 1rem; padding: 1rem; }
         }
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -89,11 +98,13 @@
             <ul class="nav nav-pills flex-column mb-auto">
                 <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}"><i class="bi bi-house-door"></i> Dashboard</a></li>
                 <li><a href="/clientes/" class="nav-link {% if 'clientes' in request.path %}active{% endif %}"><i class="bi bi-people"></i> Clientes</a></li>
+                <li><a href="/vendedores/" class="nav-link {% if 'vendedores' in request.path %}active{% endif %}"><i class="bi bi-person-badge"></i> Vendedores</a></li>
                 <li><a href="/produtos/" class="nav-link {% if 'produtos' in request.path %}active{% endif %}"><i class="bi bi-box-seam"></i> Produtos</a></li>
                 <li><a href="/pedidos/" class="nav-link {% if 'pedidos' in request.path %}active{% endif %}"><i class="bi bi-cart"></i> Pedidos</a></li>
                 <li><a href="/financeiro/" class="nav-link {% if 'financeiro' in request.path %}active{% endif %}"><i class="bi bi-cash-coin"></i> Financeiro</a></li>
                 <li><a href="/relatorios/" class="nav-link {% if 'relatorios' in request.path %}active{% endif %}"><i class="bi bi-bar-chart"></i> Relatórios</a></li>
-                <li class="mt-2"><span class="fw-bold text-light small ms-1">Configurações</span></li>
+                <li><a href="/configuracao/" class="nav-link {% if 'configuracao' in request.path %}active{% endif %}"><i class="bi bi-gear"></i> Configurações</a></li>
+                <li class="mt-2"><span class="fw-bold text-light small ms-1">Outros</span></li>
                 <li><a href="/configuracao/modelos-impressao/" class="nav-link {% if 'modelos-impressao' in request.path %}active{% endif %}"><i class="bi bi-printer"></i> Modelo de Impressão</a></li>
             </ul>
                     </nav>
@@ -104,7 +115,10 @@
                 </div>
                 <div>
                     {% if request.user.is_authenticated %}
-                        <a href="/logout/" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Sair</button>
+                        </form>
                     {% else %}
                         <a href="/login/" class="btn btn-outline-primary btn-sm"><i class="bi bi-box-arrow-in-right"></i> Login</a>
                     {% endif %}
@@ -117,6 +131,64 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+<script>
+(function() {
+    // Tempo de expiração da sessão em segundos (de settings.py)
+    var sessionTimeout = 1800; // 30 minutos
+    var warningTime = 120; // 2 minutos antes
+    var warningShown = false;
+    var renewUrl = '/'; // Qualquer URL que renove a sessão (página inicial)
+
+    function showSessionWarning() {
+        var modal = document.getElementById('sessionWarningModal');
+        if (modal) {
+            var bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+    }
+
+    function renewSession() {
+        fetch(renewUrl, {credentials: 'same-origin'}).then(function() {
+            location.reload();
+        });
+    }
+
+    setTimeout(function() {
+        warningShown = true;
+        showSessionWarning();
+    }, (sessionTimeout - warningTime) * 1000);
+
+    // Opcional: logout automático após o tempo total
+    setTimeout(function() {
+        window.location.href = '/logout/';
+    }, sessionTimeout * 1000);
+
+    window.renewSession = renewSession;
+})();
+</script>
+
+<!-- Modal de aviso de expiração de sessão -->
+<div class="modal fade" id="sessionWarningModal" tabindex="-1" aria-labelledby="sessionWarningLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sessionWarningLabel">Sessão prestes a expirar</h5>
+      </div>
+      <div class="modal-body">
+        Sua sessão irá expirar em 2 minutos por inatividade.<br>
+        Deseja continuar logado?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="renewSession()">Continuar logado</button>
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-danger">Sair agora</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
 </body>
 </html>

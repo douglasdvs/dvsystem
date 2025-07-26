@@ -8,23 +8,23 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="f1-title">Meus Clientes</h1>
     <div>
-      <a href="{% url 'clientes:tipos_cliente' %}" class="btn btn-outline-info me-2">
+      <a href="{% url 'clientes:tipos_cliente' %}" class="btn btn-outline-info me-2" title="Tipos de Cliente">
         <i class="fas fa-layer-group"></i> Tipos de Cliente
       </a>
-      <a href="{% url 'clientes:novo_segmento' %}" class="btn btn-outline-success me-2">
+      <a href="{% url 'clientes:novo_segmento' %}" class="btn btn-outline-success me-2" title="Cadastrar Segmento">
         <i class="fas fa-tags"></i> Cadastrar Segmento
       </a>
-      <a href="{% url 'clientes:novo' %}" class="btn f1-btn">➕ Novo Cliente</a>
+      <a href="{% url 'clientes:novo' %}" class="btn f1-btn" title="Novo Cliente">➕ Novo Cliente</a>
     </div>
   </div>
 
   <!-- Filtros -->
-  <form method="get" class="row g-3 align-items-end mb-4">
+  <form method="get" class="row g-3 align-items-end mb-4" aria-label="Filtros de clientes">
     <div class="col-md-3">
-      <input type="text" name="busca" value="{{ busca }}" class="form-control" placeholder="Buscar nome, CPF/CNPJ, e-mail, telefone...">
+      <input type="text" name="busca" id="busca" value="{{ busca }}" class="form-control" placeholder="Buscar nome, CPF/CNPJ, e-mail, telefone...">
     </div>
     <div class="col-md-2">
-      <select name="tipo_cliente" class="form-select">
+      <select name="tipo_cliente" id="tipo_cliente" class="form-select" title="Tipo de Cliente">
         <option value="">Tipo de Cliente</option>
         <option value="todos" {% if tipo_cliente == 'todos' %}selected{% endif %}>Todos</option>
         {% for tipo in tipos_cliente %}
@@ -33,14 +33,14 @@
       </select>
     </div>
     <div class="col-md-2">
-      <select name="status" class="form-select">
+      <select name="status" id="status" class="form-select" title="Status do Cliente">
         <option value="todos" {% if status == 'todos' %}selected{% endif %}>Todos</option>
         <option value="ativos" {% if status == 'ativos' %}selected{% endif %}>Ativos</option>
         <option value="inativos" {% if status == 'inativos' %}selected{% endif %}>Inativos</option>
       </select>
     </div>
     <div class="col-md-2">
-      <select name="uf" class="form-select">
+      <select name="uf" id="uf" class="form-select" title="UF">
         <option value="">UF</option>
         {% for uf in clientes_por_uf.keys %}
         <option value="{{ uf }}" {% if uf_selected == uf %}selected{% endif %}>{{ uf }}</option>
@@ -48,7 +48,19 @@
       </select>
     </div>
     <div class="col-md-2">
-      <select name="itens_por_pagina" class="form-select">
+      <select name="segmento" id="segmento" class="form-select" title="Segmento">
+        {% if segmentos %}
+          <option value="">Segmento</option>
+          {% for seg in segmentos %}
+            <option value="{{ seg.id }}" {% if segmento_id == seg.id|stringformat:'s' %}selected{% endif %}>{{ seg.nome }}</option>
+          {% endfor %}
+        {% else %}
+          <option value="">Nenhum segmento cadastrado</option>
+        {% endif %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="itens_por_pagina" id="itens_por_pagina" class="form-select" title="Itens por página">
         <option value="10" {% if itens_por_pagina == 10 %}selected{% endif %}>10 por página</option>
         <option value="25" {% if itens_por_pagina == 25 %}selected{% endif %}>25 por página</option>
         <option value="50" {% if itens_por_pagina == 50 %}selected{% endif %}>50 por página</option>
@@ -56,50 +68,95 @@
       </select>
     </div>
     <div class="col-md-1">
-      <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filtrar</button>
+      <button type="submit" class="btn btn-primary w-100" title="Filtrar"><i class="fas fa-search"></i> Filtrar</button>
     </div>
   </form>
   <table class="table table-dark table-hover">
     <thead>
       <tr>
         <th>Nome</th>
-        <th>CEP</th>
-        <th>Cidade/UF</th>
+        <th>Nome da Loja</th>
+        <th>Cidade</th>
+        <th>Segmento</th>
         <th>Ações</th>
       </tr>
     </thead>
     <tbody>
-      {% for cliente in clientes %}
-      <tr>
-        <td>{{ cliente.nome }}</td>
-        <td>{{ cliente.cep }}</td>
-        <td>{{ cliente.cidade }}/{{ cliente.uf }}</td>
-        <td>
-          <div class="dropdown">
-            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonCliente{{ cliente.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-ellipsis-v"></i> Ações
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCliente{{ cliente.pk }}">
-              <li>
-                <a class="dropdown-item" href="{% url 'clientes:editar' cliente.pk %}">
-                  <i class="fas fa-edit text-primary"></i> Editar
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{% url 'clientes:excluir' cliente.pk %}" onclick="return confirm('Deseja excluir este cliente?');">
-                  <i class="fas fa-trash text-danger"></i> Excluir
-                </a>
-              </li>
-            </ul>
-          </div>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="4" class="text-center f1-empty">Nenhum cliente encontrado.</td>
-      </tr>
-      {% endfor %}
+      {% if clientes %}
+        {% for cliente in clientes %}
+        <tr>
+          <td>{{ cliente.nome }}</td>
+          <td>{{ cliente.nome_loja }}</td>
+          <td>{% if cliente.enderecos.first %}{{ cliente.enderecos.first.cidade }}{% endif %}</td>
+          <td>{{ cliente.segmento }}</td>
+          <td>
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonCliente{{ cliente.pk }}" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-ellipsis-v"></i> Ações
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonCliente{{ cliente.pk }}">
+                <li>
+                  <a class="dropdown-item" href="{% url 'clientes:editar' cliente.pk %}">
+                    <i class="fas fa-edit text-primary"></i> Editar
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'clientes:excluir' cliente.pk %}" onclick="return confirm('Deseja excluir este cliente?');">
+                    <i class="fas fa-trash text-danger"></i> Excluir
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="4" class="text-center">Nenhum cliente encontrado.</td></tr>
+      {% endif %}
     </tbody>
   </table>
+
+  <!-- Paginação -->
+  {% if clientes.has_other_pages %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if clientes.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ clientes.previous_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1" aria-disabled="true" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% endif %}
+
+      {% for i in clientes.paginator.page_range %}
+        {% if clientes.number == i %}
+          <li class="page-item active" aria-current="page"><a class="page-link" href="#">{{ i }}</a></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="?page={{ i }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if clientes.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ clientes.next_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1" aria-disabled="true" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 {% endblock %}

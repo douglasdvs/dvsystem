@@ -7,15 +7,31 @@
 
 {% block content %}
 <div class="container-fluid px-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Erros no formulário:</strong>
+            <ul>
+            {% for field, errors in form.errors.items %}
+                <li><strong>{{ field }}:</strong> {{ errors|join:', ' }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mt-4">
             {% if form.instance.pk %}
-            <i class="fas fa-user-edit"></i> Editar Cliente
+            <i class="fas fa-user-edit" aria-label="Editar Cliente"></i> Editar Cliente
             {% else %}
-            <i class="fas fa-user-plus"></i> Novo Cliente
+            <i class="fas fa-user-plus" aria-label="Novo Cliente"></i> Novo Cliente
             {% endif %}
         </h1>
-        <a href="{% url 'clientes:lista' %}" class="btn btn-secondary">
+        <a href="{% url 'clientes:lista' %}" class="btn btn-secondary" title="Voltar para lista de clientes">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
     </div>
@@ -198,4 +214,4 @@
         })();
     });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -16,5 +16,20 @@
         <button type="submit" class="btn btn-success">Salvar</button>
         <a href="{% url 'clientes:listar' %}" class="btn btn-secondary">Cancelar</a>
     </form>
+    <hr>
+    <h4 class="mt-4">Segmentos cadastrados</h4>
+    <ul class="list-group">
+      {% for seg in segmentos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ seg.nome }}{% if seg.descricao %} - <small>{{ seg.descricao }}</small>{% endif %}</span>
+          <span>
+            <a href="{% url 'clientes:editar_segmento' seg.pk %}" class="btn btn-sm btn-primary">Editar</a>
+            <a href="{% url 'clientes:excluir_segmento' seg.pk %}" class="btn btn-sm btn-danger">Excluir</a>
+          </span>
+        </li>
+      {% empty %}
+        <li class="list-group-item">Nenhum segmento cadastrado.</li>
+      {% endfor %}
+    </ul>
 </div>
 {% endblock %}

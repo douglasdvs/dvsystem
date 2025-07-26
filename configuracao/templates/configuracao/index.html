@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block title %}Configurações{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4"><i class="bi bi-gear"></i> Configurações do Sistema</h1>
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-person-gear"></i> Usuários e Permissões</h5>
+          <p class="card-text">Gerencie usuários, grupos e permissões de acesso ao sistema.</p>
+          <a href="#" class="btn btn-outline-primary disabled">Em breve</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-building"></i> Parâmetros Gerais</h5>
+          <p class="card-text">Nome da empresa, logo, dados de contato, idioma e moeda.</p>
+          <a href="/configuracao/parametros-gerais/" class="btn btn-outline-primary">Acessar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-printer"></i> Modelos de Impressão</h5>
+          <p class="card-text">Personalize recibos, pedidos, orçamentos e etiquetas.</p>
+          <a href="/configuracao/modelos-impressao/" class="btn btn-outline-primary">Acessar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-plug"></i> Integrações</h5>
+          <p class="card-text">Configuração de integrações com e-mail, WhatsApp, pagamentos e APIs.</p>
+          <a href="/configuracao/integracoes/" class="btn btn-outline-primary">Acessar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-hdd-stack"></i> Backup e Restauração</h5>
+          <p class="card-text">Faça backup manual do banco de dados e restaure quando necessário.</p>
+          <a href="/configuracao/backup/" class="btn btn-outline-primary">Acessar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-clipboard-data"></i> Logs e Auditoria</h5>
+          <p class="card-text">Visualize logs do sistema e auditoria de ações de usuários.</p>
+          <a href="#" class="btn btn-outline-primary disabled">Em breve</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-palette"></i> Personalização</h5>
+          <p class="card-text">Temas, logo, favicon e mensagem de boas-vindas.</p>
+          <a href="#" class="btn btn-outline-primary disabled">Em breve</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-bank"></i> Financeiro</h5>
+          <p class="card-text">Parâmetros de cobrança, juros, multa e dados bancários.</p>
+          <a href="#" class="btn btn-outline-primary disabled">Em breve</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-file-earmark-text"></i> Parâmetros Fiscais</h5>
+          <p class="card-text">CNPJ, Inscrição Estadual, envio de e-mails automáticos e fiscais.</p>
+          <a href="#" class="btn btn-outline-primary disabled">Em breve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

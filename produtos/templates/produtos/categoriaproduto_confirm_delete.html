@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="alert alert-warning">
+        <h4>Confirmação de Exclusão</h4>
+        <p>Tem certeza que deseja excluir a categoria <strong>{{ object }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

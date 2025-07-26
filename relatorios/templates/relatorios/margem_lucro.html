@@ -55,7 +55,7 @@
     <tbody>
         {% for d in dados %}
         <tr>
-            <td>{{ d.produto }}</td>
+            <td>{{ d.nome_produto }}</td>
             <td>R$ {{ d.receita|floatformat:2 }}</td>
             <td>R$ {{ d.custo|floatformat:2 }}</td>
             <td>R$ {{ d.lucro_bruto|floatformat:2 }}</td>
@@ -68,7 +68,7 @@
 </table>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const labels = [{% for d in dados %}'{{ d.produto|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+const labels = [{% for d in dados %}'{{ d.nome_produto|escapejs }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
 const data = [{% for d in dados %}{{ d.margem|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
 const colors = data.map(v => v < 0 ? '#d32f2f' : '#388e3c');
 const ctx = document.getElementById('graficoMargem').getContext('2d');

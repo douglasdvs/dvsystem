@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Vendedor{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="card-title mb-4">{% if object %}Editar{% else %}Novo{% endif %} Vendedor</h2>
+            <form method="post">{% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-flex justify-content-between mt-3">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Salvar</button>
+                    <a href="{% url 'vendedores:list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

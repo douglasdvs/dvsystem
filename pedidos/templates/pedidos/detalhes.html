@@ -206,6 +206,13 @@
     </div>
     {% endif %}
 
+    {% if status_atual and proximos_status_debug %}
+    <div class="alert alert-info">
+        <strong>Status atual:</strong> {{ status_atual }}<br>
+        <strong>Próximos status permitidos:</strong> {{ proximos_status_debug|join:', ' }}
+    </div>
+    {% endif %}
+
     <div class="row">
         <!-- Informações do Pedido -->
         <div class="col-md-8">
@@ -381,7 +388,7 @@
                         </a>
                         
                         {% if pedido.pode_ser_cancelado %}
-                        <a href="{% url 'pedidos:alterar_status' pedido.pk 'X' %}" 
+                        <a href="{% url 'pedidos:alterar_status' pedido.pk 'C' %}"
                            class="btn btn-outline-danger"
                            onclick="return confirm('Tem certeza que deseja cancelar este pedido?')">
                             <i class="fas fa-times"></i> Cancelar Pedido

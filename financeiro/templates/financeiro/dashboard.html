@@ -4,7 +4,6 @@
 {% block title %}Dashboard Financeiro{% endblock %}
 
 {% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 .kpi-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -85,12 +84,12 @@
         <div class="card-body">
             <form method="get" class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Data Início</label>
-                    <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" class="form-control">
+                    <label for="data_inicio_input" class="form-label">Data Início</label>
+                    <input type="date" name="data_inicio" id="data_inicio_input" value="{{ data_inicio|date:'Y-m-d' }}" class="form-control">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Data Fim</label>
-                    <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" class="form-control">
+                    <label for="data_fim_input" class="form-label">Data Fim</label>
+                    <input type="date" name="data_fim" id="data_fim_input" value="{{ data_fim|date:'Y-m-d' }}" class="form-control">
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
                     <button type="submit" class="btn f1-btn w-100">
@@ -175,40 +174,30 @@
 
     <!-- Gráficos -->
     <div class="row mb-4">
-        <!-- Fluxo de Caixa -->
-        <div class="col-md-8">
+        <!-- Receitas por Categoria -->
+        <div class="col-md-6">
             <div class="chart-container">
-                <h5 class="text-white mb-3">
-                    <i class="fas fa-chart-line"></i> Fluxo de Caixa (30 dias)
+                <h5 class="text-black mb-3">
+                    <i class="fas fa-chart-pie"></i> Receitas por Categoria
                 </h5>
-                <canvas id="fluxoCaixaChart" width="400" height="200"></canvas>
+                <canvas id="receitasCategoriaChart"></canvas>
             </div>
         </div>
 
-        <!-- Receitas por Categoria -->
-        <div class="col-md-4">
+        <!-- Despesas por Categoria -->
+        <div class="col-md-6">
             <div class="chart-container">
-                <h5 class="text-white mb-3">
-                    <i class="fas fa-chart-pie"></i> Receitas por Categoria
+                <h5 class="text-black mb-3">
+                    <i class="fas fa-chart-pie"></i> Despesas por Categoria
                 </h5>
-                <canvas id="receitasCategoriaChart" width="200" height="200"></canvas>
+                <canvas id="despesasCategoriaChart"></canvas>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Despesas por Categoria -->
-        <div class="col-md-6">
-            <div class="chart-container">
-                <h5 class="text-white mb-3">
-                    <i class="fas fa-chart-pie"></i> Despesas por Categoria
-                </h5>
-                <canvas id="despesasCategoriaChart" width="200" height="200"></canvas>
-            </div>
-        </div>
-
         <!-- Resumo Rápido -->
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card f1-card">
                 <div class="card-header">
                     <h5><i class="fas fa-tachometer-alt"></i> Resumo Rápido</h5>
@@ -224,7 +213,12 @@
                             <h4>R$ {{ total_receitas|floatformat:2 }}</h4>
                         </div>
                         <div class="col-12">
-                        <div class="progress mb-2" aria-label="Progresso da meta mensal">
+                        <div class="progress mb-2"
+                             role="progressbar"
+                             aria-label="Progresso da meta mensal"
+                             aria-valuenow="{{ total_receitas|floatformat:0 }}"
+                             aria-valuemin="0"
+                             aria-valuemax="10000">
                         {% widthratio total_receitas 10000 100 as percentual %}
                         <div class="progress-bar bg-success" style="width: {{ percentual|default:0 }}%"></div>
                         </div>
@@ -242,129 +236,85 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 <script>
-// Dados do fluxo de caixa
-const fluxoData = {{ fluxo_data|safe }};
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar Chart.js para tema claro (fundo branco)
+    Chart.defaults.color = '#333'; // Cor escura para o texto
+    Chart.defaults.borderColor = '#ddd'; // Cor clara para as bordas
 
-// Configurar Chart.js para tema escuro
-Chart.defaults.color = '#ffffff';
-Chart.defaults.borderColor = '#404040';
-
-// Gráfico de Fluxo de Caixa
-const fluxoCtx = document.getElementById('fluxoCaixaChart').getContext('2d');
-new Chart(fluxoCtx, {
-    type: 'line',
-    data: {
-        labels: fluxoData.map(d => d.data),
-        datasets: [{
-            label: 'Receitas',
-            data: fluxoData.map(d => d.receitas),
-            borderColor: '#38ef7d',
-            backgroundColor: 'rgba(56, 239, 125, 0.1)',
-            tension: 0.4
-        }, {
-            label: 'Despesas',
-            data: fluxoData.map(d => d.despesas),
-            borderColor: '#fc466b',
-            backgroundColor: 'rgba(252, 70, 107, 0.1)',
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return 'R$ ' + value.toLocaleString('pt-BR');
-                    }
-                }
-            }
+    // Gráfico de Receitas por Categoria
+    const receitasCtx = document.getElementById('receitasCategoriaChart').getContext('2d');
+    const receitasCategoriaData = {{ receitas_por_categoria|safe }};
+    new Chart(receitasCtx, {
+        type: 'doughnut',
+        data: {
+            labels: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.categoria) : ['Sem dados'],
+            datasets: [{
+                data: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.total) : [1],
+                backgroundColor: [
+                    '#38ef7d',
+                    '#667eea',
+                    '#fdbb2d',
+                    '#fc466b',
+                    '#3f5efb'
+                ]
+            }]
         },
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return context.dataset.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                        }
                     }
                 }
             }
         }
-    }
-});
+    });
 
-// Gráfico de Receitas por Categoria
-const receitasCtx = document.getElementById('receitasCategoriaChart').getContext('2d');
-const receitasCategoriaData = {{ receitas_por_categoria|safe }};
-new Chart(receitasCtx, {
-    type: 'doughnut',
-    data: {
-        labels: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.categoria) : ['Sem dados'],
-        datasets: [{
-            data: receitasCategoriaData.length > 0 ? receitasCategoriaData.map(item => item.total) : [1],
-            backgroundColor: [
-                '#38ef7d',
-                '#667eea',
-                '#fdbb2d',
-                '#fc466b',
-                '#3f5efb'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+    // Gráfico de Despesas por Categoria
+    const despesasCtx = document.getElementById('despesasCategoriaChart').getContext('2d');
+    const despesasCategoriaData = {{ despesas_por_categoria|safe }};
+    new Chart(despesasCtx, {
+        type: 'doughnut',
+        data: {
+            labels: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.categoria) : ['Sem dados'],
+            datasets: [{
+                data: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.total) : [1],
+                backgroundColor: [
+                    '#fc466b',
+                    '#3f5efb',
+                    '#fdbb2d',
+                    '#667eea',
+                    '#38ef7d'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
+                        }
                     }
                 }
             }
         }
-    }
-});
-
-// Gráfico de Despesas por Categoria
-const despesasCtx = document.getElementById('despesasCategoriaChart').getContext('2d');
-const despesasCategoriaData = {{ despesas_por_categoria|safe }};
-new Chart(despesasCtx, {
-    type: 'doughnut',
-    data: {
-        labels: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.categoria) : ['Sem dados'],
-        datasets: [{
-            data: despesasCategoriaData.length > 0 ? despesasCategoriaData.map(item => item.total) : [1],
-            backgroundColor: [
-                '#fc466b',
-                '#3f5efb',
-                '#fdbb2d',
-                '#667eea',
-                '#38ef7d'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return context.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
-                    }
-                }
-            }
-        }
-    }
+    });
 });
 </script>
 {% endblock %}
