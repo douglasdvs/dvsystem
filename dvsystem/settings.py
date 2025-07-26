@@ -18,7 +18,11 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,supabase-py.onrender.com").split(",")
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "supabase-py.onrender.com"
+]
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = reverse_lazy("core:index")
